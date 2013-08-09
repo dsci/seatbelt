@@ -1,6 +1,39 @@
 # Seatbelt
 
-TODO: Write a gem description
+Interface for communication between the Vagalo web application and a travel data
+layer.
+
+## Development instructions
+
+### Install RSpec Git Pre-commit hook
+
+To get a working testsuite before committing code to the repository you have to install a Git pre-commit hook that prevends you from committing unless your specs passed or are pending.
+
+If you haven't <code>wget</code> installed already, install it with:
+
+```
+brew install wget
+```
+
+Install the hook:
+
+```
+wget -O .git/hooks/rspec-precommit https://raw.github.com/markhazlett/RSpec-Pre-commit-Git-Hook/master/rspec-precommit
+```
+
+After installing, call
+
+```
+chmod +x .git/hooks/rspec-precommit
+```
+
+to make it executable.
+
+### Testing
+
+Although running the testsuite with [Guard](http://guardgem.org/) I highly recommened the
+[RubyTest](http://sublimepackages.com/#/details/rubytest) Sublime Text package.
+
 
 ## Installation
 
