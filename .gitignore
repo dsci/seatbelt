@@ -4,6 +4,7 @@
 .config
 .yardoc
 Gemfile.lock
+rspec_results.html
 InstalledFiles
 _yardoc
 coverage
