@@ -9,7 +9,7 @@ layer.
 
 To get a working testsuite before committing code to the repository you have to install a Git pre-commit hook that prevends you from committing unless your specs passed or are pending.
 
-If you haven't <code>wget</code> installed already, install it with:
+If you haven't <code>wget</code> installed already, install it using homebrew:
 
 ```
 brew install wget
