@@ -18,13 +18,13 @@ brew install wget
 Install the hook:
 
 ```
-wget -O .git/hooks/rspec-precommit https://raw.github.com/markhazlett/RSpec-Pre-commit-Git-Hook/master/rspec-precommit
+wget -O .git/hooks/pre-commit https://raw.github.com/markhazlett/RSpec-Pre-commit-Git-Hook/master/rspec-precommit
 ```
 
 After installing, call
 
 ```
-chmod +x .git/hooks/rspec-precommit
+chmod +x .git/hooks/pre-commit
 ```
 
 to make it executable.
