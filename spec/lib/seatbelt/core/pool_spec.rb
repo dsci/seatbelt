@@ -49,7 +49,7 @@ describe Seatbelt::Pool::Api do
       context "its signature" do
 
         after do
-          pool.instance_variable_set(:@lookup_tbl, [])
+          pool.instance_variable_set(:@lookup_tbl, Seatbelt::LookupTable.new)
         end
 
         it "requires at least a method name" do

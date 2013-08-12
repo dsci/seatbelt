@@ -43,7 +43,7 @@ module Seatbelt
         options           = args.last.is_a?(::Hash) ? args.pop : {}
         meta_definitions  = { args.first => default_options.merge(options) }
 
-        lookup_tbl << meta_definitions
+        lookup_tbl.set(meta_definitions)
       end
 
 
