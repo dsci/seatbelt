@@ -40,7 +40,7 @@ module Seatbelt
         default_options   = { :scope          => :instance,
                               :block_required => false
                             }
-        options           = args.last.is_a?(::Hash) ? args.pop : {}
+        options           = args.extract_options!
         meta_definitions  = { args.first => default_options.merge(options) }
 
         lookup_tbl.set(meta_definitions)

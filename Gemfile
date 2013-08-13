@@ -10,4 +10,5 @@ end
 group :development do
   gem "step-up", "~> 0.9.1"
   gem 'guard-rspec'
+  gem 'ruby_gntp'
 end

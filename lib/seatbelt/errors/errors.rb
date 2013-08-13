@@ -21,12 +21,28 @@ module Seatbelt
     end
 
 
-    # Public: Various methods useful for performing mathematical operations.
-    # All methods are module methods and should be called on the Math module.
+    # Public: Will be raised if a meta method definition will be inserted into
+    # the class lookuptable but already exists.
     #
     class MetaMethodDuplicateError < StandardError
       def message
         "The meta-method you want to define is ambigious."
+      end
+    end
+
+
+    # Public: Will be raised if a meta method is defined but not implemented in
+    # the remote class.
+    #
+    class MethodNotImplementedError < NoMethodError; end
+
+
+    # Public: Will be raised if a method directive for configurating the Gate is
+    # used but the directive is not allowed for usage.
+    #
+    class DirectiveNotAllowedError < StandardError
+      def message
+        "The directive you want to use is not allowed."
       end
     end
 

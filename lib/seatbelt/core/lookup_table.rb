@@ -23,7 +23,7 @@ module Seatbelt
 
 
     # Public: Finds a method configuration by method name.
-    # 
+    #
     # method_name - The method configuration identifier.
     #
     # Example:
@@ -63,12 +63,17 @@ module Seatbelt
     #
     # Returns the method configuration if found, otherwise nil.
     def get(method_c)
-      if method_c.is_a?(Symbol) or method_c.is_a?(String)
-        method = find_method(method_c)
+      eqlCheck = false
+      identifier = if method_c.is_a?(Symbol) or method_c.is_a?(String) then
+        method_c
       elsif method_c.is_a?(Hash)
-        method = find_method(method_c.keys.first)
-        return method if method.eql?(method_c)
+        eqlCheck = true
+        method_c.keys.first
       end
+      method = find_method(identifier)
+
+      return method unless eqlCheck
+      return method if method.eql?(method_c)
     end
 
 
