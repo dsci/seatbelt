@@ -76,7 +76,13 @@ describe Seatbelt::Terminal do
 
         before(:all) do
           class ASample
+            def abs_of_number(number)
+              number.abs
+            end
 
+            def self.klass_method
+              1
+            end
           end
 
           module Seatbelt
@@ -84,12 +90,12 @@ describe Seatbelt::Terminal do
               include Gate
 
               def method_to_call(num)
-                2+num
+                2+num+proxy.call(:abs_of_number, -2)
               end
               implement :method_to_call, :as => "ASample#my_method"
 
               def acts_as_class_method(factor1, factor2)
-                factor1 * factor2
+                factor1 * factor2 - proxy.call(:klass_method)
               end
               implement :acts_as_class_method, :as => "ASample.c_method"
             end
@@ -98,20 +104,20 @@ describe Seatbelt::Terminal do
 
         context "and it's an instance method" do
           it "delegates to the implemented method" do
-            expect(Seatbelt::Terminal.call(:my_method, ASample.new,2)).to eq 4
+            expect(Seatbelt::Terminal.call(:my_method, ASample.new,2)).to eq 6
           end
 
           it "raises an ArgumentError if too few arguments passed through" do
             expect do
               Seatbelt::Terminal.call(:my_method, ASample.new)
             end.to raise_error(ArgumentError)
-
           end
+
         end
 
         context "and it's a class method" do
           it "delegates to the implemented method" do
-            expect(Seatbelt::Terminal.call(:c_method, ASample,2,3)).to eq 6
+            expect(Seatbelt::Terminal.call(:c_method, ASample,2,3)).to eq 5
           end
 
           it "raises an ArgumentError if too few arguments passed through" do

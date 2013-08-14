@@ -8,6 +8,16 @@ module Seatbelt
       base.class_eval{ extend ClassMethods }
     end
 
+    # Public: Access the implementation class Proxy class instance.
+    # If there is no Proxy class instance defined, a new instance will
+    # be initialized.
+    #
+    # Returns the proxy class instance.
+    def proxy
+      @proxy = Seatbelt::Proxy.new unless defined?(@proxy)
+      @proxy
+    end
+
     module ClassMethods
 
       def method_added(name)

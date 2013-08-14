@@ -17,6 +17,8 @@ module Seatbelt
 
     # Public: calls the implementation of an API method with passed arguments
     # and block.
+    # Before sending the method message to the receiver, it defines the
+    # receivers proxy scope depending on klass (see below).
     #
     # action  -   The API method name to be called
     # klass   -   The API class name on which the API method is declared
@@ -35,8 +37,30 @@ module Seatbelt
       unless action_implemented
         raise Seatbelt::Errors::MethodNotImplementedError
       end
-      action_implemented[:method].call(*args, &block)
+      implemented_method = action_implemented[:method]
+      define_proxy(implemented_method, klass)
+      implemented_method.call(*args, &block)
     end
+
+
+    # Internal: Defines the proxy scope of the implementation method depending
+    # on klass (proxy scope could be instance of a API class or the API class
+    # itself).
+    #
+    # method -  The bounded method of the implementation class.
+    # klass  -  The API Class or an instance of the API class.
+    #
+    # Returns the duplicated String.
+    def self.define_proxy(method, klass)
+      method.receiver.send(:proxy).instance_variable_set(:@klass, klass)
+      method.receiver.send(:proxy).class.class_eval <<-RUBY
+        def klass
+          return @klass
+        end
+        private :klass
+      RUBY
+    end
+    private_class_method :define_proxy
 
   end
 end

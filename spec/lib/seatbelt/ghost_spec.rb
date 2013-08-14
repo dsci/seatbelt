@@ -29,6 +29,11 @@ describe Seatbelt::Ghost do
     describe "calling an instance API method" do
 
       before(:all) do
+        Seatbelt.configure_gate do |config|
+          config.method_directive_class     = "."
+          config.method_directive_instance  = "#"
+        end
+
         Sample.class_eval do
           api_method :sum_numbers
         end

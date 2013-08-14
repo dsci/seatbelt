@@ -1,5 +1,5 @@
 module Seatbelt
-  
+
   # Public: Handles calling and defining of API methods.
   #
   # Any class that should acts like a API Class have to include this module.

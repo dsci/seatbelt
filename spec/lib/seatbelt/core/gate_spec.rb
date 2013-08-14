@@ -53,4 +53,12 @@ describe Seatbelt::Gate do
     end
 
   end
+
+  describe "instance methods" do
+
+    it "provides #proxy" do
+      expect(ImplementsA.new).to respond_to(:proxy)
+    end
+
+  end
 end
