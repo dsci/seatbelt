@@ -34,7 +34,7 @@ module Seatbelt
       def api_method(*args)
         raise Errors::ArgumentsMissmatchError if args.empty?
         raise Errors::MissingMetaMethodName if args.first.is_a?(Hash)
-        if @lookup_tbl.map{|n| n.keys}.flatten.include?(args.first)
+        if lookup_tbl.map{|n| n.keys}.flatten.include?(args.first)
           raise Errors::MetaMethodDuplicateError
         end
         default_options   = { :scope          => :instance,

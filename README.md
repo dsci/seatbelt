@@ -32,7 +32,7 @@ to make it executable.
 ### Testing
 
 Although running the testsuite with [Guard](http://guardgem.org/) I highly recommened the
-[RubyTest](http://sublimepackages.com/#/details/rubytest) Sublime Text package.
+[RubyTest](https://sublime.wbond.net/packages/RubyTest) Sublime Text package.
 
 
 ## Installation

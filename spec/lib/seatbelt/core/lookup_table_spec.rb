@@ -55,7 +55,7 @@ describe Seatbelt::LookupTable do
         context "and a method with this name exists" do
 
           it "returns true" do
-            expect(@table.has?(:has_method)).to be true
+            expect(@table.has?(:has_method, scope: :class)).to be true
           end
 
         end
@@ -100,6 +100,32 @@ describe Seatbelt::LookupTable do
 
     end
 
+    describe "#find_method" do
+      before do
+        @option_class = {
+          :foobar => {
+            :scope          => :class,
+            :block_required => false
+          }
+        }
+
+        @option_instance = {
+          :foobar => {
+            :scope          => :instance,
+            :block_required => true
+          }
+        }
+
+        table.set(@option_class)
+        table.set(@option_instance)
+      end
+
+      it "finds instance method by default" do
+        expect(table.find_method(:foobar, scope: :instance)).to eq @option_instance
+      end
+
+    end
+
     describe "#get" do
 
       describe "lookup has a method to get " do
@@ -118,7 +144,7 @@ describe Seatbelt::LookupTable do
         context "by method name" do
 
           it "returns the method configuration" do
-            fetched_method = @table.get(:get_flights)
+            fetched_method = @table.get(:get_flights, scope: :class)
             expect(fetched_method).to eq @options
           end
 
@@ -186,7 +212,7 @@ describe Seatbelt::LookupTable do
           it "removes the method and returns the removed configuration" do
             config = {}
             expect do
-              config = table.remove_method(:my_method)
+              config = table.remove_method(:my_method, scope: :class)
             end.to change{ table.size }.by(-1)
             expect(config).to be_a_kind_of(Hash)
             expect(config).to eq method_options
