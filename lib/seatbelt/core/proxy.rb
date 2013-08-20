@@ -53,5 +53,10 @@ module Seatbelt
     def call(method_name, *args, &block)
       self.send(:klass).send(method_name,*args,&block)
     end
+
+    def object
+      self.send(:klass)
+    end
+
   end
 end

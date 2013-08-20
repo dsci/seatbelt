@@ -1,6 +1,7 @@
 # Gem dependencies are required here.
 require 'seatbelt/gate_config'
 require 'seatbelt/ghost'
+require 'seatbelt/document'
 require 'seatbelt/core/ext/core_ext'
 require 'seatbelt/errors/errors'
 require 'seatbelt/core/lookup_table'

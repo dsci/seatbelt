@@ -98,6 +98,11 @@ describe Seatbelt::Terminal do
                 factor1 * factor2 - proxy.call(:klass_method)
               end
               implement :acts_as_class_method, :as => "ASample.c_method"
+
+              def return_proxy
+                return proxy.object
+              end
+              implement :return_proxy, :as => "ASample#chain"
             end
           end
         end
@@ -105,6 +110,9 @@ describe Seatbelt::Terminal do
         context "and it's an instance method" do
           it "delegates to the implemented method" do
             expect(Seatbelt::Terminal.call(:my_method, ASample.new,2)).to eq 6
+
+            expect(Seatbelt::Terminal.call(:chain, ASample.new)).to \
+                  respond_to(:abs_of_number)
           end
 
           it "raises an ArgumentError if too few arguments passed through" do

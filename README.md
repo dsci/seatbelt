@@ -165,6 +165,30 @@ def rooms_with_tv
 end
 ```
 
+**Hint**: Chaining API classes could be done by returning ```proxy.object``` from the implementation method.
+
+### Defining attributes in API classes
+
+You can define attributes within an API class by including the ```Seatbelt::Document```module.
+
+```ruby
+class Airport
+  include Seatbelt::Ghost
+  include Seatbelt::Document
+
+  attribute :name,  String
+  attribute :lat,   Float
+  attribute :lng,   Float
+
+  api_method :identifier
+
+end
+```
+
+To access the attributes within an implementation class use the ```proxy``` and it's ```call``` method.
+
+For more informations about attributes see the [Virtus](https://github.com/solnic/virtus) project.
+
 ## Contributing
 
 1. Fork it
