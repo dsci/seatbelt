@@ -145,6 +145,27 @@ class ImplementHotel
 end
 ```
 
+Another way to implement API methods is to use a bulk definition of the implementation class.This is quite helpful if most of your methods in your implementation class are implementations of API methods of one(!) API class.
+
+```ruby
+class ImplementRegion
+  include Seatbelt::Gate
+
+  implement_class "Vagalo::Region",
+                  :only => [
+                            {:implement_find_by_iso_code => {:as => ".by_isocode"}}
+                           ]
+
+  def implement_find_by_iso_code(code)
+    # do smth
+  end
+
+end
+```
+
+Note that  the method config signature is mostly the same like #implement but the class name or namespace is obviously removed at the ```:at``` key.
+
+
 ### Accessing the API class in implementations of API meta-methods
 
 You can access the API class within the implementation methods through the

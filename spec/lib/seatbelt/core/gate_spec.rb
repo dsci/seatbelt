@@ -11,6 +11,10 @@ describe Seatbelt::Gate do
       expect(ImplementsA).to respond_to(:implement)
     end
 
+    it "provides #implement_class" do
+      expect(ImplementsA).to respond_to(:implement_class)
+    end
+
     describe "#implement" do
 
       it "registers a logic method the the terminal" do
@@ -47,6 +51,54 @@ describe Seatbelt::Gate do
         expect(config[:namespace]).to eq "Vagalo::Airport"
         expect(config[:scope]).to eq :instance
         expect(config[:implemented_as]).to eq :book_flight_to
+
+      end
+
+    end
+
+    describe "#implement_class" do
+      before(:all) do
+
+      end
+
+      context "and given a method config array for :only" do
+
+        it "mass registers logic methods for a module namespace" do
+          expect do
+            ImplementsA.class_eval do
+              implement_class "Vagalo::Airport",
+                              :only => [{:clean_seat_count => {:as => "#seats"}}]
+
+
+              def clean_seat_count;end
+            end
+          end.to change { Seatbelt::Terminal.luggage.size }.by(1)
+
+          config = Seatbelt::Terminal.luggage.last
+          expect(config[:namespace]).to eq "Vagalo::Airport"
+          expect(config[:scope]).to eq :instance
+          expect(config[:implemented_as]).to eq :seats
+        end
+
+      end
+
+      context "and given a method config hash for :only" do
+
+        it "registers a logic method with module namespace and instance method" do
+          expect do
+            ImplementsA.class_eval do
+              implement_class "Vagalo::Airport",
+                              :only => {:delays => {:as => ".fetch_delays"}}
+
+              def delays(days);end
+            end
+          end.to change { Seatbelt::Terminal.luggage.size }.by(1)
+
+          config = Seatbelt::Terminal.luggage.last
+          expect(config[:namespace]).to eq "Vagalo::Airport"
+          expect(config[:scope]).to eq :class
+          expect(config[:implemented_as]).to eq :fetch_delays
+        end
 
       end
 

@@ -5,7 +5,10 @@ module Seatbelt
   module Gate
 
     def self.included(base)
-      base.class_eval{ extend ClassMethods }
+      base.class_eval do
+        extend ClassMethods
+        private_class_method :implementation_methods
+      end
     end
 
     # Public: Access the implementation class Proxy class instance.
@@ -19,9 +22,44 @@ module Seatbelt
     end
 
     module ClassMethods
+      # Internal: Collection of implementation methods configurations defined
+      # with the #implement_class directive.
+      def implementation_methods
+        @impl_methods ||= []
+      end
 
+      # Public: Ruby hook to check if a method that is added to the class was
+      # defined with the #implement_class directive. If so, it calls the
+      # #implement method. For further information see their method documention.
+      #
+      # name - the method name as Symbol
       def method_added(name)
-        #TODO implement me!
+        implementation_method = implementation_methods.detect do |method_config|
+          name.in?(method_config.keys)
+        end
+        if implementation_method
+          config = implementation_method.values.pop
+          method = self.instance_method(name).bind(self.new)
+          config[:method] = method
+          implement(name, config)
+        end
+      end
+
+      # Public: Adds a bunch of method forward declaration object to for a
+      # specific class.
+      # Later it calls #implement during #method_added.
+      #
+      # *args - An argument list containing:
+      #
+      # Returns the duplicated String.
+      def implement_class(*args)
+        options = args.extract_options!
+        klass   = args.pop
+        only      = options[:only]
+        iterator  = Core::Iterators::MethodConfig.
+                      send("#{only.class.name.downcase}_method_iterator",klass,
+                           self)
+        only.each(&iterator)
       end
 
       # Public: Adds a method forward declaration object to a method config

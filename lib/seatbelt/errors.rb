@@ -1,0 +1,1 @@
+require 'seatbelt/errors/errors'
