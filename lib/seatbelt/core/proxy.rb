@@ -2,7 +2,8 @@ module Seatbelt
 
   # Public: A Seatbelt::Proxy class is a shadow of any class that includes
   # Seatbelt::Gate.
-  # It provides access to the API class or instance of the API class.
+  # It provides access to the API class or instance of the API class and
+  # implements the DynamicProxy pattern.
   #
   # A Proxy class provides a private dynamic accessor #klass that changes with
   # the implementation scope of the API methods implementation.
@@ -40,6 +41,8 @@ module Seatbelt
   # end
   class Proxy
 
+    NOT_ALLOWABLE_CALLS_ON_OBJECT = %w{ call object klass }
+
     # Public: Send a method message to the current #klass scope receiver.
     # See class documentation section for further informations about #klass.
     #
@@ -56,6 +59,19 @@ module Seatbelt
 
     def object
       self.send(:klass)
+    end
+
+
+    # Public: Delegates a method message to the #object receiver if the
+    # message is not included in NOT_ALLOWABLE_CALLS_ON_OBJECT or the
+    # class responds to.
+    def method_missing(method_name, *args, &block)
+      unless method_name.to_s.in?(NOT_ALLOWABLE_CALLS_ON_OBJECT) &&
+        (not self.respond_to?(method_name))
+        self.send(:klass).send(method_name, *args, &block)
+      else
+        super
+      end
     end
 
   end
