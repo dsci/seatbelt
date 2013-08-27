@@ -33,11 +33,32 @@ module Seatbelt
   #
   # For more information about definining and working with attributes see
   # 'Virtus' project page: https://github.com/solnic/virtus
+  #
+  # To have validations for attributes just implement ActiveModel validations.
+  # For more informations about that see the ActiveModel validations docs:
+  # http://api.rubyonrails.org/classes/ActiveModel/Validations.html
+  #
+  # Example
+  #
+  # class Airport
+  #   include Seatbelt::Ghost
+  #   include Seatbelt::Document
+  #
+  #   attribute :name,  String
+  #   attribute :lat,   Float
+  #   attribute :lng,   Float
+  #
+  #   validates_presence_of :name
+  #
+  #   api_method :identifier
+  #
+  #  end
   module Document
 
     def self.included(base)
       base.class_eval do
         include ::Virtus
+        include ::ActiveModel::Validations
       end
     end
   end

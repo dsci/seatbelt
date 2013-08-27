@@ -16,11 +16,10 @@ describe Seatbelt::Document do
         expect(SampleDocument).to respond_to(:attribute)
       end
 
-      <<-DOC
+
       it "#validates_presence_of" do
         expect(SampleDocument).to respond_to(:validates_presence_of)
       end
-      DOC
 
     end
 
@@ -72,6 +71,38 @@ describe Seatbelt::Document do
           document = SampleDocument.new(:name => "Winter")
           expect(document.foo).to eq "Winter"
         end
+      end
+    end
+
+    describe "validating of attributes" do
+      before(:all) do
+        SampleDocument.class_eval do
+          attribute :name, String
+
+          validates_presence_of :name
+        end
+      end
+
+      describe "#validates_presence_of" do
+
+        context "attribute is given" do
+
+          it "then the model is valid" do
+            document = SampleDocument.new(:name => "Peter")
+            expect(document).to be_valid
+          end
+
+        end
+
+        context "attribute is not given" do
+
+          it "then the model isn't valid" do
+            document = SampleDocument.new
+            expect(document).to_not be_valid
+          end
+
+        end
+
       end
     end
 
