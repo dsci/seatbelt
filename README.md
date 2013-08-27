@@ -186,6 +186,15 @@ def rooms_with_tv
 end
 ```
 
+```#call``` could be omitted and message send directly to the API class or instance receiver.
+
+```ruby
+def rooms_with_tv
+  excluded_rooms  = proxy.second_floor
+  room_criteria   = proxycriteria(:not => :gallery)
+end
+```
+
 **Hint**: Chaining API classes could be done by returning ```proxy.object``` from the implementation method.
 
 ### Defining attributes in API classes
