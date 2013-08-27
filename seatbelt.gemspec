@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Seatbelt::VERSION
   spec.authors       = ["Daniel Schmidt"]
   spec.email         = ["dsci@code79.net"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Interface for accessing travel data from TravelIt}
+  spec.summary       = %q{A nifty travel gem}
   spec.homepage      = ""
   spec.license       = "MIT"
 
