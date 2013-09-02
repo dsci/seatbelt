@@ -20,6 +20,7 @@ tmp
 # RVM
 .ruby-version
 .ruby-gemset
+.rvmrc
 
 # OSX
 .DS_Store
