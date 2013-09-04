@@ -86,5 +86,22 @@ module Seatbelt
       end
     end
 
+    # Public: Will be raised if a question/query is called and no tape with
+    # implementation is found.
+    #
+    class NoTapeFoundForQueryError < ::StandardError
+      def message
+        "There is no tape implemented for answering this question."
+      end
+    end
+
+    # Public: Will be raised if a tape should be used in multiple tape decks.
+    #
+    class MultipleTapeUsageDetectedError < ::StandardError
+      def message
+        "A tape can't be used in multiple tape decks."
+      end
+    end
+
   end
 end
