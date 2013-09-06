@@ -219,6 +219,77 @@ To access the attributes within an implementation class use the ```proxy``` and 
 
 For more informations about attributes see the [Virtus](https://github.com/solnic/virtus) project.
 
+### Defining associations between objects
+
+Associations between objects is possible in two ways if ```Seatbelt::Document``` is included in the class. 
+
+**one-to-many**
+
+```ruby
+module Seatbelt
+  module Models 
+	class Airport
+	  include Seatbelt::Document
+	  
+	  has_many :flights, Seatbelt::Models::Flight
+	  
+	end
+  end
+end
+```
+
+A ```has_many``` relationship definition takes two arguments:
+
+* the association name
+* the class used for a single item in the relationship collection
+
+That creates an accessor method acts like an ```Array```.
+
+You can add items to the collection (association) in two ways:
+
+*instance level*
+
+```ruby
+airport = Seatbelt::Models::Airport.where(:name => "London Stansted")
+Flights.find_to(airport.name).each do |flight|
+  aiport.flights << flight 	
+end
+```
+
+*attribute level*
+
+```ruby
+airport = Seatbelt::Models::Airport.where(:name => "London Stansted")
+GetFromTheInternet.fetch_flights.each do |flight|
+  aiport.flights << {:number => flight["fn_num"], :return_flight_at => flight["RRUECK"]}
+end
+```
+
+**one-to-one**
+
+```ruby
+module Seatbelt
+  module Models
+    class Hotel
+      include Seatbelt::Document
+      
+      has :region
+    end
+  end
+end
+```
+
+A ```has``` association takes two arguments where the last one is optional. 
+
+* the association name
+* the class used for the assocation
+
+If the second argument is omitted ```has``` guessed the corrosping model class. Taken the example above it will use the 
+```Seatbelt::Models::Region``` class. 
+
+You can assign an object to the association the same way as assigning an attribute.
+
+
 ## Contributing
 
 1. Fork it

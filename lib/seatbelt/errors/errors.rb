@@ -62,5 +62,29 @@ module Seatbelt
       end
     end
 
+    # Public: Will be raised if a model is assigned to a 'has_many' association
+    # and the models class isn't of required type.
+    class TypeMissmatchError < ::StandardError
+      attr_accessor :awaited, :got
+
+      # Public: Initialize a TypeMissmatchError.
+      #
+      # awaited - The awaited objects class name
+      # got     - The actual assigned objects class name.
+      def initialize(awaited, got)
+        @awaited = awaited
+        @got = got
+      end
+
+      # The exception message in an understandable form.
+      #
+      # Returns the error message.
+      def to_s
+        msg = "An instance of #{awaited} awaited but "
+        msg += "get an instance of #{got}."
+        return msg
+      end
+    end
+
   end
 end

@@ -67,7 +67,9 @@ module Seatbelt
     # Returns the evaluted method value.
     def method_missing(method_name, *args, &block)
       unless self.class.lookup_tbl.has?(method_name)
-        raise Seatbelt::Errors::NoMethodError
+        unless self.respond_to?(method_name)
+          raise Seatbelt::Errors::NoMethodError
+        end
       end
       Seatbelt::Callee.handle(self,
                               { :lookup_tbl  => self.class.lookup_tbl,

@@ -21,6 +21,14 @@ describe Seatbelt::Document do
         expect(SampleDocument).to respond_to(:validates_presence_of)
       end
 
+      it "#provides #has_many" do
+        expect(SampleDocument).to respond_to(:has_many)
+      end
+
+      it "provides #has" do
+        expect(SampleDocument).to respond_to(:has)
+      end
+
     end
 
     describe "defining attributes" do
@@ -106,5 +114,110 @@ describe Seatbelt::Document do
       end
     end
 
+    describe "defining associations" do
+
+      describe "#has_many" do
+
+        before(:all) do
+          SampleDocument.class_eval do
+            has_many :hotels, Seatbelt::Models::Hotel
+          end
+        end
+
+        let(:document){ SampleDocument.new }
+
+        it "returns an instance of array" do
+          expect(document.hotels).to be_instance_of Seatbelt::Collections::Array
+        end
+
+        context "adding a model that isn't of required type" do
+
+          it "raises a Seatbelt::Errors::TypeMissmatchError" do
+            message = "An instance of Seatbelt::Models::Hotel awaited but "
+            message += "get an instance of Seatbelt::Models::Region."
+            expect do
+              document.hotels << Seatbelt::Models::Region.new
+            end.to raise_error Seatbelt::Errors::TypeMissmatchError, message
+          end
+        end
+
+        context "adding a model that is of required type" do
+
+          it "increases the association collection size" do
+            expect do
+              document.hotels << Seatbelt::Models::Hotel.new(:name => "Atlanta")
+            end.to change{ document.hotels.size }.by(1)
+          end
+
+          context "by only adding an attribute hash" do
+
+            it "increases the association collection size" do
+              expect do
+                document.hotels << {:name => "Westin"}
+              end.to change{ document.hotels.size }.by(1)
+            end
+
+          end
+
+        end
+      end
+
+      describe "#has" do
+
+        context "defining a reference without class" do
+          before(:all) do
+            SampleDocument.class_eval do
+              has :flight
+            end
+          end
+
+          let(:document){ SampleDocument.new }
+
+          it "takes Seatbelt::Models namespace" do
+            expect(document).to respond_to(:flight)
+          end
+
+          context "assigning the reference " do
+
+            context "has instance then the getter" do
+              it "returns the instance of guessed class" do
+                document.flight = Seatbelt::Models::Flight.new
+                expect(document.flight).to be_instance_of(Seatbelt::Models::Flight)
+              end
+            end
+
+            context "has attribute hash" do
+              it "returns the instance of guessed class" do
+                document.flight = {:trip_length => 12}
+                expect(document.flight).to be_instance_of(Seatbelt::Models::Flight)
+              end
+            end
+          end
+        end
+
+        context "defining a reference with class" do
+          before(:all) do
+            class TrashBin
+              include Seatbelt::Document
+
+              attribute :empty, Boolean
+            end
+            SampleDocument.class_eval do
+              has :trash_bin, TrashBin
+            end
+          end
+
+          let(:document){ SampleDocument.new }
+
+          it "takes the given class namespace" do
+            expect(document).to respond_to(:trash_bin)
+            document.trash_bin = TrashBin.new
+            expect(document.trash_bin).to be_instance_of(TrashBin)
+            document.trash_bin = {:emtpy => false}
+            expect(document.trash_bin).to be_instance_of(TrashBin)
+          end
+        end
+      end
+    end
   end
 end
