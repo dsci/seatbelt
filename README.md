@@ -221,18 +221,18 @@ For more informations about attributes see the [Virtus](https://github.com/solni
 
 ### Defining associations between objects
 
-Associations between objects is possible in two ways if ```Seatbelt::Document``` is included in the class. 
+Associations between objects is possible in two ways if ```Seatbelt::Document``` is included in the class.
 
 **one-to-many**
 
 ```ruby
 module Seatbelt
-  module Models 
+  module Models
 	class Airport
 	  include Seatbelt::Document
-	  
+
 	  has_many :flights, Seatbelt::Models::Flight
-	  
+
 	end
   end
 end
@@ -252,7 +252,7 @@ You can add items to the collection (association) in two ways:
 ```ruby
 airport = Seatbelt::Models::Airport.where(:name => "London Stansted")
 Flights.find_to(airport.name).each do |flight|
-  aiport.flights << flight 	
+  aiport.flights << flight
 end
 ```
 
@@ -272,23 +272,156 @@ module Seatbelt
   module Models
     class Hotel
       include Seatbelt::Document
-      
+
       has :region
     end
   end
 end
 ```
 
-A ```has``` association takes two arguments where the last one is optional. 
+A ```has``` association takes two arguments where the last one is optional.
 
 * the association name
 * the class used for the assocation
 
-If the second argument is omitted ```has``` guessed the corrosping model class. Taken the example above it will use the 
-```Seatbelt::Models::Region``` class. 
+If the second argument is omitted ```has``` guessed the corrosping model class. Taken the example above it will use the
+```Seatbelt::Models::Region``` class.
 
 You can assign an object to the association the same way as assigning an attribute.
 
+### Man ... we need a translator here
+
+>> "The Babel fish," said The Hitchhiker's Guide to the Galaxy quietly, "is small, yellow and leech-like, and probably the oddest thing in the Universe. It feeds on brainwave energy received not from its own carrier but from those around it. It absorbs all unconscious mental frequencies from this brainwave energy to nourish itself with. It then excretes into the mind of its carrier a telepathic matrix formed by combining the conscious thought frequencies with nerve signals picked up from the speech centres of the brain which has supplied them. The practical upshot of all this is that if you stick a Babel fish in your ear you can instantly understand anything in any form of language. The speech patterns you actually hear decode the brainwave matrix which has been fed into your mind by your Babel fish.
+
+*(The Hitchhiker's Guide to the Galaxy)*
+
+Let's talk about basics of the TQL (Travel Query Language). TQL is basically a query formed in a natural sentence (language doesn't matter) after a defined syntax.
+
+TQL basic support is implemented in Seatbelt v0.4. Basic support means that you are able to implement your own translations and tapes.
+
+**Tapes?**
+
+A tape is collection of ```translate``` blocks that will translate a query into some business logic. A tape is added to a tape deck that will play the corrosponding tape section to a given query (or better said - call the translation of this query).
+
+Let's take a closer look what a tape deck is and what tapes are.
+
+Any class could be act as a tape deck by including the ```Seatbelt::TapeDeck``` module. Mostly that classes are also including the ```Seatbelt::Document``` module.
+
+Adding the ```Seatbelt::TapeDeck``` module to a class gives the class the opportunity to
+
+* add tapes to the class
+* answer a query with a translation defined within a tape
+
+Before diving into some example code, let's record a tape. As mentioned above, a tape is just a bunch of translation blocks defining the query syntax and an associated logic implementation.
+
+To have translation implemented or defined you should be familiar with regular expressions, the core tool of a tape.
+
+A tape class inherits from ```Seatbelt::Tape``` and is very simple to implement.
+
+```ruby
+class PubTape < Seatbelt::Tape
+
+  translate /Gimme (\d+) beers!/ do |sentence, count_of_beer|
+    #
+  end
+
+end
+```
+
+A ```translate```block takes arguments. If your argument list of ```translate``` block has only one item, this item is the first matched value from your sentence (or if the query didn't expect any matched value then it's the original query sentence).
+
+Anyhow - every match marked with your regular expression is passed do the ```translate``` block if there are enough arguments defined.
+
+```ruby
+translate /Gimme (\d+) beers!/ do |sentence, count_of_beer|
+  # sentence is original query sentence
+  # count_of_beer is the value matched by (\d+)
+end
+```
+
+**Note:** Any argument passed to the block is passed as String. So you have to take care
+about type casts.
+
+To have access to the tape's translation block, a tape has to assigned to a tape deck.
+
+```ruby
+class Pub
+  include Seatbelt::Document
+  include Seatbelt::Tape
+
+  use_tape PubTape
+end
+```
+
+Also possible:
+
+```ruby
+Pub.add_tape PubTape
+```
+
+Having more than one tape:
+
+```ruby
+class Pub
+  include Seatbelt::Document
+  include Seatbelt::Tape
+
+  use_tapes PubTape,
+            AnotherTape
+end
+```
+
+Calling ```Pub.answer("Gimme 4 beers!")``` will call the corrosponding translation block.
+
+**Calling other tapes from a tape**
+
+To call another tape or a specific translation of a tape use the ```play_tape``` method within the ```translate```block.
+
+```ruby
+class CreditCardTape < Seatbelt::Tape
+
+  translate /Charge the credit card with (\d+) Euro./ do |amount|
+    # do something
+  end
+
+end
+
+class PubTape < Seatbelt::Tape
+
+  translate /Gimme (\d+) beers!/ do |sentence, count_of_beer|
+    overall_costs = play_tape(:section => "Want the bill for #{count_of_beer} beer")
+    play_tape(CreditCardTape, :section => "Charge the credit card with #{overall_costs} Euro.")
+  end
+
+  translate /Want the bill for (\d+) beer/ do |beer_amount|
+    costs_of_beer = 2
+    sum           = 2 * beer_amount.to_i
+    sum
+  end
+
+end
+```
+
+Note the difference between the two ```play_tape``` calls.
+
+With the ```tape_deck``` object within your translate block you have access to the associated tape deck class (not instance).
+
+### TravelAgent
+
+By knowing what tapes and tape decks are, it's easy to understand what the TravelAgent is doing.
+
+The TravelAgent takes the query and delegates the query to the responsible model.
+
+```ruby
+TravelAgent.tell_me "Hotel: 3 persons want to travel for 10 days beginning at next friday to Finnland."
+```
+
+Delegates the query ```3 persons want to travel for 10 days beginning at next friday to Finnland.``` to the ```Seatbelt::Hotel``` model.
+
+The model declaration can be ommitted, if this is done, the query is delegated to the
+```Seatbelt::Region``` model.
+
+Define your tapes in ```lib/seatbelt/tapes```!
 
 ## Contributing
 
