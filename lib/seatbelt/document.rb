@@ -135,7 +135,7 @@ module Seatbelt
         model_name              = collection_model.name.to_s.demodulize
         collection_module_name  = "Seatbelt::Collections::#{model_name}Collection"
         collection              = Module.const_get(collection_module_name)
-        collection.model_class  = collection_model
+        collection.initialize_primitive(collection_model)
         self.send(:attribute, collection_name, collection)
       end
 

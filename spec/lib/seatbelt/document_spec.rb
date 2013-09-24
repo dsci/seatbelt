@@ -174,6 +174,40 @@ describe Seatbelt::Document do
           end
 
         end
+
+        context "add multiple #has_many associations" do
+
+          before(:all) do
+            SampleDocument.class_eval do
+              has_many :offers, Seatbelt::Models::Offer
+            end
+          end
+
+          it "passes validation for every #has_many definition" do
+            document = SampleDocument.new
+            expect do
+              document.hotels << Seatbelt::Models::Hotel.new
+            end.to change { document.hotels.size }.by(1)
+            expect do
+              document.offers << Seatbelt::Models::Offer.new
+            end.to change { document.offers.size }.by(1)
+          end
+
+          it "raises an TypeMissmatchError if model isn't required type" do
+            document = SampleDocument.new
+            message = "An instance of Seatbelt::Models::Hotel awaited but "
+            message += "get an instance of Seatbelt::Models::Region."
+            expect do
+              document.hotels << Seatbelt::Models::Region.new
+            end.to raise_error Seatbelt::Errors::TypeMissmatchError, message
+            message = "An instance of Seatbelt::Models::Offer awaited but "
+            message += "get an instance of Seatbelt::Models::Region."
+            expect do
+              document.offers << Seatbelt::Models::Region.new
+            end.to raise_error Seatbelt::Errors::TypeMissmatchError, message
+          end
+
+        end
       end
 
       describe "#has" do

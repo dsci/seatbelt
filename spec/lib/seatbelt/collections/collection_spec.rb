@@ -4,8 +4,8 @@ describe Seatbelt::Collections::Collection do
 
   describe "class_methods" do
 
-    it "provides #model_class" do
-      expect(Seatbelt::Collections::Collection).to respond_to(:model_class)
+    it "provides #initialize_primitive" do
+      expect(Seatbelt::Collections::Collection).to respond_to(:initialize_primitive)
     end
 
   end
