@@ -62,6 +62,7 @@ module Seatbelt
     end
 
 
+
     # Public: Delegates a method message to the #object receiver if the
     # message is not included in NOT_ALLOWABLE_CALLS_ON_OBJECT or the
     # class responds to.

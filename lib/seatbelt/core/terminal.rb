@@ -38,8 +38,9 @@ module Seatbelt
         raise Seatbelt::Errors::MethodNotImplementedError
       end
       implemented_method = action_implemented[:method]
-      define_proxy(implemented_method, klass)
-      implemented_method.call(*args, &block)
+      define_proxy(action_implemented, klass)
+      #implemented_method.call(*args, &block)
+      action_implemented.call(*args,&block)
     end
 
 
@@ -47,13 +48,17 @@ module Seatbelt
     # on klass (proxy scope could be instance of a API class or the API class
     # itself).
     #
-    # method -  The bounded method of the implementation class.
-    # klass  -  The API Class or an instance of the API class.
+    # method_proxy  -  The method proxy onject of the implementation class.
+    # klass         -  The API Class or an instance of the API class.
     #
     # Returns the duplicated String.
-    def self.define_proxy(method, klass)
-      method.receiver.send(:proxy).instance_variable_set(:@klass, klass)
-      method.receiver.send(:proxy).class.class_eval <<-RUBY
+    def self.define_proxy(method_proxy, klass)
+      if method_proxy.class_method_implementation?
+        method_proxy.receiver.class.proxy.instance_variable_set(:@klass, klass)
+      else
+        method_proxy.receiver.proxy.instance_variable_set(:@klass, klass)
+      end
+      method_proxy.receiver.send(:proxy).class.class_eval <<-RUBY
         def klass
           return @klass
         end

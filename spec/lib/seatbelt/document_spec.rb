@@ -62,6 +62,11 @@ describe Seatbelt::Document do
             include Seatbelt::Ghost
             api_method :foo
 
+            api_method :bar, :scope => :class
+
+            def self.class_foo
+              "Summer"
+            end
           end
 
           class ImplementsSampleDocument
@@ -72,12 +77,21 @@ describe Seatbelt::Document do
               return proxy.call(:name)
             end
             implement :implementation_method, :as => "SampleDocument#foo"
+
+            def self.another_implementation_method
+              return proxy.call(:class_foo)
+            end
+            implement :another_implementation_method,
+                      :as => "SampleDocument.bar",
+                      :type => :class
           end
         end
 
         it "evaluates the attributes value" do
           document = SampleDocument.new(:name => "Winter")
           expect(document.foo).to eq "Winter"
+
+          expect(SampleDocument.bar).to eq "Summer"
         end
       end
     end

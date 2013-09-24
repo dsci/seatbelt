@@ -6,22 +6,29 @@ module Seatbelt
 
     def self.included(base)
       base.class_eval do
+        include Proxy
         extend ClassMethods
         private_class_method :implementation_methods
       end
     end
 
-    # Public: Access the implementation class Proxy class instance.
-    # If there is no Proxy class instance defined, a new instance will
-    # be initialized.
-    #
-    # Returns the proxy class instance.
-    def proxy
-      @proxy = Seatbelt::Proxy.new unless defined?(@proxy)
-      @proxy
+    module Proxy
+
+      # Public: Access the implementation class Proxy class instance.
+      # If there is no Proxy class instance defined, a new instance will
+      # be initialized.
+      #
+      # Returns the proxy class instance.
+      def proxy
+        @proxy = Seatbelt::Proxy.new unless defined?(@proxy)
+        @proxy
+      end
+
     end
 
     module ClassMethods
+      include Gate::Proxy
+
       # Internal: Collection of implementation methods configurations defined
       # with the #implement_class directive.
       def implementation_methods
@@ -95,14 +102,23 @@ module Seatbelt
         scope_chain   = remote_method.split(directive)
         remote_method = scope_chain.pop.to_sym
         namespace     = scope_chain.shift
+        type          = options.fetch(:type, :instance)
 
-        config        = {
-          :method         => instance_method(method).bind(self.new),
-          :implemented_as => remote_method,
-          :namespace      => namespace,
-          :scope          => method_scope
-        }
-        Terminal.luggage << config
+        if method_scope.eql?(:instance)
+          method    = instance_method(method)
+        end
+        receiver    = self.new
+
+        method_proxy                            = Seatbelt::MethodProxyObject.
+                                                                          new
+        method_proxy.method                     = method
+        method_proxy.scope_level                = method_scope
+        method_proxy.namespace                  = namespace
+        method_proxy.implemented_as             = remote_method
+        method_proxy.receiver                   = receiver
+        method_proxy.method_implementation_type = type
+
+        Terminal.luggage << method_proxy
       end
 
     end

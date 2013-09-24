@@ -36,22 +36,23 @@ describe Seatbelt::Terminal do
         end
 
         before do
-          config = {
-            :method         => Array.instance_method(:push),
-            :implemented_as => :add_item,
-            :namespace      => "Seatbelt::Array",
-            :scope          => :class
-          }
-          Seatbelt::Terminal.luggage << config
+          proxy                 = Seatbelt::MethodProxyObject.new
+          proxy.method          = Array.instance_method(:push)
+          proxy.implemented_as  = :add_item
+          proxy.scope           = :class
+          proxy.namespace       = "Seatbelt::Array"
+          proxy.receiver        = Array
 
-          config = {
-            :method         => Array.instance_method(:push),
-            :implemented_as => :my_method,
-            :namespace      => "Seatbelt::Array",
-            :scope          => :instance
-          }
+          Seatbelt::Terminal.luggage << proxy
 
-          Seatbelt::Terminal.luggage << config
+          proxy                 = Seatbelt::MethodProxyObject.new
+          proxy.method          = Array.instance_method(:push)
+          proxy.implemented_as  = :my_method
+          proxy.scope           = :instance
+          proxy.namespace       = "Seatbelt::Array"
+          proxy.receiver        = Array
+
+          Seatbelt::Terminal.luggage << proxy
         end
 
         it "raises Seatbelt::MethodNotImplementedError" do
@@ -103,6 +104,12 @@ describe Seatbelt::Terminal do
                 return proxy.object
               end
               implement :return_proxy, :as => "ASample#chain"
+
+              def self.klass_method
+                return 2 + proxy.call(:klass_method)
+              end
+              implement :klass_method, :as => "ASample.klass_method",
+                        :type => :class
             end
           end
         end
@@ -113,6 +120,7 @@ describe Seatbelt::Terminal do
 
             expect(Seatbelt::Terminal.call(:chain, ASample.new)).to \
                   respond_to(:abs_of_number)
+
           end
 
           it "raises an ArgumentError if too few arguments passed through" do
@@ -126,6 +134,7 @@ describe Seatbelt::Terminal do
         context "and it's a class method" do
           it "delegates to the implemented method" do
             expect(Seatbelt::Terminal.call(:c_method, ASample,2,3)).to eq 5
+            expect(Seatbelt::Terminal.call(:klass_method, ASample)).to eq 3
           end
 
           it "raises an ArgumentError if too few arguments passed through" do

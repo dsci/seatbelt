@@ -118,15 +118,23 @@ class ImplementHotel
    # ...
   end
   implement :hotels_nearby_city, :as => "Hotel.find_nearby"
+
+  def self.all
+    # ....
+  end
+  implement :all, :as   => "Hotel.all",
+                  :type => :class
 end
 ```
 
 The ```implement``` directive takes two arguments. The first one is the method name of the
-implementation, the second one is a ```Hash``` with a ```:as``` key.
+implementation, the second one is a ```Hash``` with a ```:as``` key and optional a ```:type``` key.
 
 The ```:as``` key takes a String that defines in which class the API meta-method is located and the name of the method to implement. The scope of the method (class or instance method) is identified with the seperator that isolates the Class namespace.
 
-For identifying instance methods use ```#``` , for defining class methods use ```.``` .
+The ```:type``` key let you define a delegation of a class method in your implementation class to a class method in your API class.
+
+For identifying instance methods within the API class use ```#``` , for defining class methods use ```.``` .
 
 ```ruby
 class ImplementHotel
@@ -196,6 +204,8 @@ end
 ```
 
 **Hint**: Chaining API classes could be done by returning ```proxy.object``` from the implementation method.
+
+**Note:** If you want to delegate a class method of your implementation class to a class API method by using the ```:type``` key, the proxy object acts as the class object of the API class.
 
 ### Defining attributes in API classes
 

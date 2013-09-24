@@ -1,6 +1,7 @@
 require 'seatbelt/core/lookup_table'
 require 'seatbelt/core/pool'
 require 'seatbelt/core/gate'
+require 'seatbelt/core/method_proxy_object'
 require 'seatbelt/core/terminal'
 require 'seatbelt/core/callee'
 require 'seatbelt/core/proxy'

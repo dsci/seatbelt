@@ -33,7 +33,6 @@ describe Seatbelt::Gate do
         expect(config).to have_key(:scope)
 
         expect(config[:implemented_as]).to eq :flight_time
-        expect(config[:method]).to be_a_kind_of(Method)
         expect(config[:namespace]).to eq "A"
         expect(config[:scope]).to eq :class
       end
