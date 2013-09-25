@@ -5,7 +5,9 @@ module Seatbelt
   #
   class Terminal
     # The implementation methods config store.
-    cattr_writer :luggage
+    def self.luggage=(luggage_pack)
+      @luggage = luggage_pack
+    end
 
     # Public: The implementation methods config store.
     #
