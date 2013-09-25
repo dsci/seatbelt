@@ -19,7 +19,7 @@ module Seatbelt
       # be initialized.
       #
       # Returns the proxy class instance.
-      def proxy
+      def proxy_object
         @proxy = Seatbelt::Proxy.new unless defined?(@proxy)
         @proxy
       end
@@ -107,7 +107,7 @@ module Seatbelt
         if method_scope.eql?(:instance)
           method    = instance_method(method)
         end
-        receiver    = self.new
+        receiver    = self
 
         method_proxy                            = Seatbelt::MethodProxyObject.
                                                                           new

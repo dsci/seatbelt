@@ -107,8 +107,56 @@ describe Seatbelt::Gate do
 
   describe "instance methods" do
 
-    it "provides #proxy" do
-      expect(ImplementsA.new).to respond_to(:proxy)
+    it "provides #proxy_object" do
+      expect(ImplementsA.new).to respond_to(:proxy_object)
+    end
+
+    describe "#proxy" do
+
+      before do
+
+        class ProxySample
+          include Seatbelt::Document
+          include Seatbelt::Ghost
+
+          attribute :name, String
+
+          api_method :bar
+          api_method :foo
+
+        end
+
+        ImplementsA.class_eval do
+
+          attr_accessor :airport_codes
+
+          def implement_bar
+            airport_codes = 12
+            return [proxy,self]
+          end
+          implement :implement_bar, :as => "ProxySample#bar"
+
+          def implement_foo
+            return [proxy,self]
+          end
+          implement :implement_foo, :as => "ProxySample#foo"
+
+        end
+
+      end
+
+      it "will not be the same object for multiple API class instances" do
+        first   = ProxySample.new(:name => "Foo")
+        second  = ProxySample.new(:name => "Bar")
+
+        first_proxy, first_imp   = first.bar
+        second_proxy, second_imp  = second.bar
+
+        expect(first_proxy).not_to be second_proxy
+        expect(first_proxy.name).to eq "Foo"
+        expect(second_proxy.name).to eq "Bar"
+      end
+
     end
 
   end

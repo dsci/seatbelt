@@ -54,9 +54,10 @@ describe Seatbelt::MethodProxyObject do
           end
         end
         proxy.method          = Sample.instance_method(:foo)
-        proxy.receiver        = Sample.new
+        proxy.receiver        = Sample
         proxy.scope_level     = :instance
         proxy.implemented_as  = :superfoo
+        proxy.instance_variable_set(:@callee, Sample.new)
       end
 
       it "calls the implemented method" do
@@ -68,15 +69,16 @@ describe Seatbelt::MethodProxyObject do
     context "on class level" do
 
       before do
-        class Sample
+        class NextSample
           def self.count
             return 12
           end
         end
         proxy.method          = :count
-        proxy.receiver        = Sample
+        proxy.receiver        = NextSample
         proxy.scope_level     = :class
         proxy.implemented_as  = :superfoo
+        proxy.method_implementation_type = :class
       end
 
       it "calls the implemented method" do

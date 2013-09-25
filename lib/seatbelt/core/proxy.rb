@@ -69,7 +69,7 @@ module Seatbelt
     def method_missing(method_name, *args, &block)
       unless method_name.to_s.in?(NOT_ALLOWABLE_CALLS_ON_OBJECT) &&
         (not self.respond_to?(method_name))
-        self.send(:klass).send(method_name, *args, &block)
+        object.send(method_name, *args, &block)
       else
         super
       end

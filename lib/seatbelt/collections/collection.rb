@@ -32,6 +32,17 @@ module Seatbelt
       end
 
       primitive.class_eval do
+        # Public: Adds an object to the 'has_many' association.
+        #
+        # item - An instance of the model class used within the collection
+        #        or an Hash with attribute key/value pairs.
+        #
+        # Example
+        #   region.hotels << {:name => "Radisson London Stansted"}
+        #   region.hotels << super_hotel_in_dubai
+        #
+        # Raises Seatbelt::Errors::TypeMissmatchError if unexpected object
+        # is passed.
         def <<(item)
           case item.class.name
           when acceptable_item_name then super(item)

@@ -53,17 +53,7 @@ module Seatbelt
     #
     # Returns the duplicated String.
     def self.define_proxy(method_proxy, klass)
-      if method_proxy.class_method_implementation?
-        method_proxy.receiver.class.proxy.instance_variable_set(:@klass, klass)
-      else
-        method_proxy.receiver.proxy.instance_variable_set(:@klass, klass)
-      end
-      method_proxy.receiver.send(:proxy).class.class_eval <<-RUBY
-        def klass
-          return @klass
-        end
-        private :klass
-      RUBY
+      method_proxy.init_klass_on_receiver(klass)
     end
     private_class_method :define_proxy
 
