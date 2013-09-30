@@ -20,12 +20,54 @@ module Seatbelt
 
     def self.included(base)
       base.class_eval do
-        [Pool::Api, ClassMethods].each { |mod| self.extend mod }
+        [Pool::Api, EigenmethodStore, ClassMethods].each { |m| self.extend m }
+        include EigenmethodStore
+
+        class << self
+
+          alias_method :_new, :new
+          # Public: Overrides the Class#new method to create the class instance
+          # eigenmethods.
+          #
+          # *args - An argumentlist passed to #initialize
+          #
+          # Returns the instance.
+          def new(*args)
+            obj = _new(*args)
+            namespace = obj.class.name
+            eigenmethods_for_scope = Terminal.
+                                     for_scope_and_namespace(:instance,
+                                                             namespace)
+            unless eigenmethods_for_scope.empty?
+              proxy = Seatbelt::Proxy.new
+              receiver = eigenmethods_for_scope.first.receiver.new
+              eigenmethods_for_scope.each do |eigenmethod|
+                options = {:eigenmethod => eigenmethod,
+                           :object      => obj,
+                           :receiver    => receiver,
+                           :return_method => true,
+                           :add_to      => false
+                          }
+                obj.eigenmethods << Seatbelt::EigenmethodProxy.set(proxy, options)
+              end
+            end
+            return obj
+          end
+        end
+
       end
     end
 
-    module ClassMethods
+    module EigenmethodStore
 
+      def eigenmethods
+        @eigenmethods ||= []
+      end
+
+    end
+
+
+    module ClassMethods
       # Public: Calls a API class method. If the method isn't defined or
       # found in the class lookup table a Seatbelt::Errors::NoMethodError is
       # raised.

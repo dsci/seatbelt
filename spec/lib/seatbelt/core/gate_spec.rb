@@ -5,6 +5,11 @@ describe Seatbelt::Gate do
     include Seatbelt::Gate
   end
 
+  def stub_eigenmethods
+    A.stub(:eigenmethods).and_return([])
+    Vagalo::Airport.stub(:eigenmethods).and_return([])
+  end
+
   describe "class methods" do
 
     it "provides #implement" do
@@ -16,6 +21,12 @@ describe Seatbelt::Gate do
     end
 
     describe "#implement" do
+
+      before(:all) do
+        class A; end
+        module Vagalo; class Airport; end; end
+        stub_eigenmethods
+      end
 
       it "registers a logic method the the terminal" do
         expect do
@@ -56,8 +67,8 @@ describe Seatbelt::Gate do
     end
 
     describe "#implement_class" do
-      before(:all) do
-
+      before(:each) do
+        stub_eigenmethods
       end
 
       context "and given a method config array for :only" do
@@ -113,7 +124,7 @@ describe Seatbelt::Gate do
 
     describe "#proxy" do
 
-      before do
+      before(:all) do
 
         class ProxySample
           include Seatbelt::Document
@@ -123,15 +134,17 @@ describe Seatbelt::Gate do
 
           api_method :bar
           api_method :foo
+          api_method :codecs
 
         end
 
-        ImplementsA.class_eval do
-
+        class ProxyImplementationSample
+          include Seatbelt::Gate
           attr_accessor :airport_codes
 
-          def implement_bar
-            airport_codes = 12
+          def implement_bar(name)
+            @airport_codes = 12
+            proxy.name = name
             return [proxy,self]
           end
           implement :implement_bar, :as => "ProxySample#bar"
@@ -141,6 +154,13 @@ describe Seatbelt::Gate do
           end
           implement :implement_foo, :as => "ProxySample#foo"
 
+          def implement_increase_airport_codes(num)
+            @airport_codes = num
+            return self
+          end
+          implement :implement_increase_airport_codes,
+                    :as => "ProxySample#codecs"
+
         end
 
       end
@@ -149,15 +169,147 @@ describe Seatbelt::Gate do
         first   = ProxySample.new(:name => "Foo")
         second  = ProxySample.new(:name => "Bar")
 
-        first_proxy, first_imp   = first.bar
-        second_proxy, second_imp  = second.bar
+        first_proxy, first_imp   = first.bar("walter")
+        second_proxy, second_imp  = second.bar("hannes")
 
+        expect(first.codecs(99).airport_codes).to eq 99
+        expect(second.codecs(200).airport_codes).to eq 200
+#
         expect(first_proxy).not_to be second_proxy
-        expect(first_proxy.name).to eq "Foo"
-        expect(second_proxy.name).to eq "Bar"
+        expect(first_proxy.name).to eq "walter"
+        expect(second_proxy.name).to eq "hannes"
       end
 
     end
 
+  end
+
+  describe "defining implementation classes" do
+
+    context "api methods on instance level" do
+
+      before(:all) do
+        class ApiFooSample
+          include Seatbelt::Document
+          include Seatbelt::Ghost
+
+          attribute :code, Integer
+
+          api_method :sample_method1
+          api_method :sample_method2
+          api_method :sample_method3
+        end
+
+        class ImplementationApiFooSample
+          include Seatbelt::Gate
+
+          attr_accessor :codec
+
+          def initialize
+            @codec = "mp4"
+          end
+
+          def implementation_sample_method1
+            #p self.object_id
+            #p proxy
+            #puts caller
+            #p "in implementation method"
+            #p proxy.object_id
+            return proxy,self, codec
+          end
+          implement :implementation_sample_method1,
+                    :as => "ApiFooSample#sample_method1"
+
+          def implementation_sample_method2
+            #p self.object_id
+            @codec = "divx"
+
+
+            return proxy,self, codec
+          end
+          implement :implementation_sample_method2,
+                    :as => "ApiFooSample#sample_method2"
+
+          def implementation_sample_method3
+            return proxy,self, codec
+          end
+          implement :implementation_sample_method3,
+                    :as => "ApiFooSample#sample_method3"
+        end
+      end
+
+      context "implementing multiple methods within the same namespace" do
+
+        it "uses the same proxy object" do
+          api = ApiFooSample.new(:code => 911)
+          api2 = ApiFooSample.new(:code => 112)
+
+          api2_proxy1,api2_object1, api_code2 = api2.sample_method1
+          api1_proxy1,api1_object1, api_code1 = api.sample_method1
+
+          sample_method1_proxy, sample_method1_object,code1 = api.sample_method1
+          sample_method2_proxy, sample_method2_object,code2 = api.sample_method2
+          sample_method3_proxy, sample_method3_object,code3 = api.sample_method3
+
+          expect(sample_method1_object.object_id).to eq sample_method2_object.object_id
+          expect(sample_method1_object).to eq sample_method3_object
+          expect(sample_method2_object).to eq sample_method3_object
+
+          expect(sample_method1_proxy).to eq sample_method2_proxy
+          expect(sample_method1_proxy).to eq sample_method3_proxy
+          expect(sample_method2_proxy).to eq sample_method3_proxy
+
+          expect(sample_method1_proxy.code).to eq 911
+
+          expect(code1).to eq "mp4"
+          expect(code2).to eq "divx"
+          expect(code3).to eq "divx"
+
+        end
+
+      end
+
+      context "implementing multiple methods within several namespaces" do
+
+        before(:all) do
+
+          class ApiBarSample
+            include Seatbelt::Ghost
+
+            api_method :method1
+          end
+
+          ImplementationApiFooSample.class_eval do
+            def implement_with_other_namespace
+              return proxy, self
+            end
+            implement :implement_with_other_namespace,
+                      :as => "ApiBarSample#method1"
+
+          end
+
+        end
+
+        it "every method has its own proxy scope" do
+          apibar  = ApiBarSample.new
+          api     = ApiFooSample.new(:code => 911)
+
+          apibar_proxy = apibar.method1.first
+          api_proxy    = api.sample_method1.first
+
+          expect(apibar_proxy).not_to be api_proxy
+        end
+
+        it "every method namespace has its own instance" do
+          apibar  = ApiBarSample.new
+          api     = ApiFooSample.new(:code => 911)
+
+          apibar_object = apibar.method1[1]
+          api_object    = api.sample_method1[1]
+
+          expect(apibar_object).not_to be api_object
+        end
+      end
+    end
   end
 end

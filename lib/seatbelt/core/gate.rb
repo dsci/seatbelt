@@ -8,7 +8,8 @@ module Seatbelt
       base.class_eval do
         include Proxy
         extend ClassMethods
-        private_class_method :implementation_methods
+        private_class_method :implementation_methods,
+                             :eigenmethods_class_level
       end
     end
 
@@ -20,7 +21,6 @@ module Seatbelt
       #
       # Returns the proxy class instance.
       def proxy_object
-        @proxy = Seatbelt::Proxy.new unless defined?(@proxy)
         @proxy
       end
 
@@ -104,13 +104,9 @@ module Seatbelt
         namespace     = scope_chain.shift
         type          = options.fetch(:type, :instance)
 
-        if method_scope.eql?(:instance)
-          method    = instance_method(method)
-        end
-        receiver    = self
+        receiver      = self
 
-        method_proxy                            = Seatbelt::MethodProxyObject.
-                                                                          new
+        method_proxy                            = Seatbelt::Eigenmethod.new
         method_proxy.method                     = method
         method_proxy.scope_level                = method_scope
         method_proxy.namespace                  = namespace
@@ -118,7 +114,39 @@ module Seatbelt
         method_proxy.receiver                   = receiver
         method_proxy.method_implementation_type = type
 
+        if method_scope.eql?(:instance)
+          method    = instance_method(method)
+        else
+          method_proxy = eigenmethods_class_level(namespace,method_proxy)
+        end
         Terminal.luggage << method_proxy
+      end
+
+      # Internal: Defines the Eigenclass method proxy object.
+      #
+      # This is only called if an implementation class implements a class
+      # method of its API class. Adds the method proxy to the eigenclass
+      # eigenmethods bucket.
+      #
+      # namespace     - The API class name
+      # method_proxy  - The MethodProxy skeleton created by #implement
+      #
+      # Returns the method proxy.
+      def eigenmethods_class_level(namespace,method_proxy)
+        receiver          = self
+        options           = { :eigenmethod   => method_proxy,
+                              :receiver      => receiver,
+                              :add_to        => false,
+                              :return_method => true
+                            }
+        proxy             = Seatbelt::Proxy.new
+        method_proxy      = Seatbelt::EigenmethodProxy.set(proxy, options)
+        klass             = Module.const_get(method_proxy.namespace)
+
+        method_proxy.init_klass_on_receiver(klass)
+        klass.eigenmethods << method_proxy
+
+        return method_proxy
       end
 
     end

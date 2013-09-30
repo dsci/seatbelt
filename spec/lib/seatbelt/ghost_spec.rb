@@ -132,7 +132,10 @@ describe Seatbelt::Ghost do
       context "that exists and is implemented" do
 
         before(:all) do
-          Sample.class_eval do
+          class RSpecSampleApiClass
+            include Seatbelt::Document
+            include Seatbelt::Ghost
+
             api_method  :find_region_by_code,
                         :scope => :class
           end
@@ -151,7 +154,7 @@ describe Seatbelt::Ghost do
                 "Great Britain"
               end
             end
-            implement :region_by_code, :as => "Sample.find_region_by_code"
+            implement :region_by_code, :as => "RSpecSampleApiClass.find_region_by_code"
 
             def book_in_time(from, to)
               true
@@ -163,8 +166,8 @@ describe Seatbelt::Ghost do
         end
 
         it "evaluates the implementation method" do
-          expect(Sample.find_region_by_code("de")).to eq "Germany"
-          expect(Sample.find_region_by_code("gb")).to eq "Great Britain"
+          expect(RSpecSampleApiClass.find_region_by_code("de")).to eq "Germany"
+          expect(RSpecSampleApiClass.find_region_by_code("gb")).to eq "Great Britain"
           expect(SampleWithNamespace::Sample.book_in_time("20130208","20130408"))
                 .to be true
         end

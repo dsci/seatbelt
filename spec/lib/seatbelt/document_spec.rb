@@ -61,6 +61,7 @@ describe Seatbelt::Document do
           SampleDocument.class_eval do
             include Seatbelt::Ghost
             api_method :foo
+            api_method :foobar
 
             api_method :bar, :scope => :class
 
@@ -72,11 +73,21 @@ describe Seatbelt::Document do
           class ImplementsSampleDocument
             include Seatbelt::Gate
 
+            attr_accessor :single_num
+
             def implementation_method
               #proxy.call("name=", "Winter")
-              return proxy.call(:name)
+              @single_num = 13
+              #p self
+              return [proxy.call(:name), self.object_id]
             end
             implement :implementation_method, :as => "SampleDocument#foo"
+
+            def implementation_method2
+              #p self
+              return [self.object_id, single_num]
+            end
+            implement :implementation_method2, :as => "SampleDocument#foobar"
 
             def self.another_implementation_method
               return proxy.call(:class_foo)
@@ -89,7 +100,12 @@ describe Seatbelt::Document do
 
         it "evaluates the attributes value" do
           document = SampleDocument.new(:name => "Winter")
-          expect(document.foo).to eq "Winter"
+          #expect(document.foo).to eq "Winter"
+          name, object_id1 = document.foo
+          object_id2, single_num = document.foobar
+
+          expect(object_id1).to eq object_id2
+          expect(single_num).to eq 13
 
           expect(SampleDocument.bar).to eq "Summer"
         end

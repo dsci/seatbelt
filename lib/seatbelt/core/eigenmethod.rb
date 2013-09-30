@@ -2,7 +2,7 @@ module Seatbelt
 
   # Public: A configuration class that contains the implementation method
   # directives and attributes.
-  class MethodProxyObject
+  class Eigenmethod
 
     attr_accessor :scope_level,
                   :namespace,
@@ -68,40 +68,31 @@ module Seatbelt
     end
 
     alias_method :has_key?, :respond_to?
-    alias_method :scope, :scope_level
-    alias_method :scope=, :scope_level=
+    alias_method :scope,    :scope_level
+    alias_method :scope=,   :scope_level=
 
 
     # Creates the corrosponding class on the receiver and defines the proxy
     # tunnel on the receivers proxy object.
     #
-    # klass_object -The API Class or an instance of the API class.
+    # klass_object - The API Class or an instance of the API class.
     #
     def init_klass_on_receiver(klass_object)
-      @callee = receiver.new
       if instance_level?
       __generate_proxy_object(@callee, klass_object)
       end
       if class_level?
-        initilizor = lambda do |receiver_scope|
-          receiver_scope.class.send(:proxy_object).
-                              instance_variable_set(:@klass, klass_object)
-          receiver_scope.class.send(:proxy_object).class_eval code
-          receiver_scope.class.send(:define_method, :proxy) do
-            return self.class.proxy_object
-          end
-          return receiver_scope
-        end
-
         if class_method_implementation?
            __generate_proxy_object(receiver, klass_object)
         else
-          @callee = initilizor.call(@callee)
+          if method_implementation_type.eql?(:instance)
+            @callee = callee.new if @callee.respond_to?(:new)
+            @callee.instance_variable_set(:@proxy,Seatbelt::Proxy.new)
+            __generate_proxy_object(callee, klass_object)
+          end
         end
       end
-
     end
-
 
     # Accessor of the api method implementation call object.
     def callee
@@ -115,10 +106,10 @@ module Seatbelt
         receiver_scope.class.send(:define_method, :proxy) do
           return self.proxy_object
         end
+        #p receiver_scope.send(:proxy_object)
         return receiver_scope
       end
       runner.call(receiver_)
-      #return receiver_scope
     end
 
     def code
@@ -132,11 +123,11 @@ module Seatbelt
 
     def __send_class_level(*args, &block)
       if class_method_implementation?
-        callee = receiver
+        object = receiver
       else
-        callee = receiver.new
+        object = callee
       end
-      callee.send(@method, *args, &block)
+      object.send(@method, *args, &block)
     end
 
     def __send_instance_level(*args, &block)
@@ -147,11 +138,11 @@ module Seatbelt
       end
     end
 
-    private :callee,
-            :__send_instance_level,
+    private :__send_instance_level,
             :__send_class_level,
             :__generate_proxy_object,
-            :code
+            :code,
+            :callee
 
   end
 end

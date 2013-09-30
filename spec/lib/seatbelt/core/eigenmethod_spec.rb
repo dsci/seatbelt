@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Seatbelt::MethodProxyObject do
+describe Seatbelt::Eigenmethod do
 
   it "provides #scope_level" do
     expect(subject).to respond_to(:scope_level)
@@ -44,7 +44,7 @@ describe Seatbelt::MethodProxyObject do
   end
 
   describe "#call" do
-    let(:proxy){ Seatbelt::MethodProxyObject.new }
+    let(:proxy){ Seatbelt::Eigenmethod.new }
     context "on instance level" do
 
       before do
