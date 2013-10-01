@@ -1,4 +1,5 @@
 require 'seatbelt/core'
+require 'seatbelt/synthesizer'
 require 'seatbelt/gate_config'
 require 'seatbelt/ghost'
 require 'seatbelt/tape'

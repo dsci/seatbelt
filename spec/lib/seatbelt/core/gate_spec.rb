@@ -20,6 +20,14 @@ describe Seatbelt::Gate do
       expect(ImplementsA).to respond_to(:implement_class)
     end
 
+    it "provides #synthesize" do
+      expect(ImplementsA).to respond_to(:synthesize)
+    end
+
+    it "provides #synthesize_map" do
+      expect(ImplementsA).to respond_to(:synthesize_map)
+    end
+
     describe "#implement" do
 
       before(:all) do

@@ -299,9 +299,88 @@ If the second argument is omitted ```has``` guessed the corrosping model class. 
 
 You can assign an object to the association the same way as assigning an attribute.
 
+### Synthesize objects
+
+Synthesizing objects is only available on instance level. By now Seatbelt will only synthesize the state of an object, not its behaviour!
+
+To synthesize an implementation class instance and the proxy object, add ```synthesize``` to the Implementation class.
+
+```ruby
+class ImplementationAirport
+  include Seatbelt::Gate
+  include Mongoid::Document
+
+  field :name,  :type => String
+  field :lat,   :type => Float
+  field :lng,   :type => Float
+
+  synthesize  :from     => "Seatbelt::Models::Airport",
+              :adapter  => "Seatbelt::Synthesizers::Mongoid"
+end
+```
+
+Then - every time ```proxy.[attribute_name]``` is changed within the implementation class - the instance of the implementation class is changed too. And vice versa:
+
+```ruby
+aiport = Seatbelt::Models::Airport.new(:name => "London Stansted")
+# in implementation class self.name will be "London Stansted"
+
+# in a implementation method
+def something
+  proxy.name = "London Gatewick"
+  p self.name # => "London Gatewick"
+end
+```
+
+If attribute names are the same on both sides, all is fine. If not, the implementation class has to implement a ```synthesize_map``` method where the keys are the attributes from the ```API class``` and the values are attributes from the ```implementation class```.
+
+```ruby
+class ImplementAirport
+  include Seatbelt::Gate
+  include Mongoid::Document
+
+  field :l_name,    :type => String
+  field :gidd_lat,  :type => Float
+  field :gidd_lng,  :type => Float
+
+  synthesize  :from     => "Seatbelt::Models::Airport",
+              :adapter  => "Seatbelt::Synthesizers::Mongoid"
+
+  synthesize_map :name => :l_name, :lat => :gidd_lat, :lng => :gidd_lng
+end
+```
+
+### Defining custom synthesizers
+
+Seatbelt provides to synthesizers:
+
+* ```Seatbelt::Synthesizers::Document```
+* ```Seatbelt::Synthesizers::Mongoid```
+
+The first one synthesizes ```Seatbelt::Document``` or ```Virtus``` based implementation classes. The second one synthesizes ```Mongoid::Document``` based implementation classed.
+
+Defining custom synthesizers helpful, if
+
+* the implementation class uses a not supported backend
+* only a few attributes should be synthesized that exists on both sides
+
+A Synthesizer is a plain Ruby class which includes the ```Seatbelt::Synthesizer``` module and implements a ```synthesizable_attributes``` method.
+
+```ruby
+class CustomSynthesizer
+  include Seatbelt::Synthesizer
+
+  def synthesizable_attributes
+    [:l_name, :gidd_lat]
+  end
+end
+```
+
+Which only synthesizes the ```:l_name``` and ```:gidd_lat``` properties.
+
 ### Man ... we need a translator here
 
->> "The Babel fish," said The Hitchhiker's Guide to the Galaxy quietly, "is small, yellow and leech-like, and probably the oddest thing in the Universe. It feeds on brainwave energy received not from its own carrier but from those around it. It absorbs all unconscious mental frequencies from this brainwave energy to nourish itself with. It then excretes into the mind of its carrier a telepathic matrix formed by combining the conscious thought frequencies with nerve signals picked up from the speech centres of the brain which has supplied them. The practical upshot of all this is that if you stick a Babel fish in your ear you can instantly understand anything in any form of language. The speech patterns you actually hear decode the brainwave matrix which has been fed into your mind by your Babel fish.
+> "The Babel fish," said The Hitchhiker's Guide to the Galaxy quietly, "is small, yellow and leech-like, and probably the oddest thing in the Universe. It feeds on brainwave energy received not from its own carrier but from those around it. It absorbs all unconscious mental frequencies from this brainwave energy to nourish itself with. It then excretes into the mind of its carrier a telepathic matrix formed by combining the conscious thought frequencies with nerve signals picked up from the speech centres of the brain which has supplied them. The practical upshot of all this is that if you stick a Babel fish in your ear you can instantly understand anything in any form of language. The speech patterns you actually hear decode the brainwave matrix which has been fed into your mind by your Babel fish.
 
 *(The Hitchhiker's Guide to the Galaxy)*
 

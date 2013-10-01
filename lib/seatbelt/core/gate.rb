@@ -7,6 +7,7 @@ module Seatbelt
     def self.included(base)
       base.class_eval do
         include Proxy
+        extend Synthesizeable
         extend ClassMethods
         private_class_method :implementation_methods,
                              :eigenmethods_class_level

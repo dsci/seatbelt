@@ -103,5 +103,13 @@ module Seatbelt
       end
     end
 
+    # Public: Will be raised if a synthseizer did not implement the
+    # synthesizable_attributes method.
+    class SynthesizeableAttributesNotImplementedError < ::StandardError
+      def message
+        "Your synthesizer has to implement #synthesizable_attributes."
+      end
+    end
+
   end
 end

@@ -3,8 +3,8 @@ module Seatbelt
 
     # Public: Abstraction of Hotel
     class Hotel
-      include Seatbelt::Ghost
       include Seatbelt::Document
+      include Seatbelt::Ghost
 
       attribute :name,              String
       attribute :address1,          String

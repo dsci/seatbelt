@@ -5,6 +5,7 @@ gemspec
 
 group :test do
   gem "rspec"
+  gem "mongoid", "~>3.1.5"
 end
 
 group :development do

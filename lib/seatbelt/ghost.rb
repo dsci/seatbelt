@@ -49,6 +49,16 @@ module Seatbelt
                            :add_to      => false
                           }
                 obj.eigenmethods << Seatbelt::EigenmethodProxy.set(proxy, options)
+                if obj.class.respond_to?(:synthesizers)
+                  synthesizers = obj.class.synthesizers.select do |synthesizer|
+                    synthesizer[:klass].eql?(obj.class.name)
+                  end
+                  unless synthesizers.empty?
+                    synthesizers.each do |synthesizer|
+                      synthesizer[:adapter].new(obj.class, receiver).synthesize
+                    end
+                  end
+                end
               end
             end
             return obj
