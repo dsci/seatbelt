@@ -111,5 +111,13 @@ module Seatbelt
       end
     end
 
+    # Public: Will be raised if an object is tried to call that does not exist
+    # at runtime.
+    class ObjectDoesNotExistError < ::StandardError
+      def message
+        "The object you called does not exist."
+      end
+    end
+
   end
 end

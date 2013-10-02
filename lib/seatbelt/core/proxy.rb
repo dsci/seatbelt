@@ -41,7 +41,7 @@ module Seatbelt
   # end
   class Proxy
 
-    NOT_ALLOWABLE_CALLS_ON_OBJECT = %w{ call object klass }
+    NOT_ALLOWABLE_CALLS_ON_OBJECT = %w{ call object klass tunnel }
 
     # Public: Send a method message to the current #klass scope receiver.
     # See class documentation section for further informations about #klass.
@@ -54,11 +54,69 @@ module Seatbelt
     # Returns the return value of the callable method or raises a
     # NoMethodError.
     def call(method_name, *args, &block)
-      self.send(:klass).send(method_name,*args,&block)
+      object.send(method_name,*args,&block)
     end
 
     def object
       self.send(:klass)
+    end
+    
+    # Public: Calls a private API attribute or method of an object defined
+    # in a API class. 
+    #
+    # It is only working on a second level.
+    #
+    # chain - The attribute call chain as String.
+    #
+    # Example:
+    #
+    # class ApiA
+    #   include Seatbelt::Document
+    #   include Seatbelt::Ghost
+    #
+    #   has :b, "Models::B"
+    #
+    # end
+    #
+    # class Models::B
+    #   include Seatbelt::Document
+    #   include Seatbelt::Ghost
+    #
+    #   # definitions
+    #
+    # end
+    #
+    # class ImplementationB 
+    #   field :name, :type => String
+    # end
+    # 
+    # In a implementation method of ApiA
+    #
+    # proxy.tunnel("b.name")
+    #
+    #
+    # Returns the duplicated String.
+    def tunnel(chain)
+      proxy_associated_object,object_method = chain.split(".")
+      unless object.respond_to?(proxy_associated_object) 
+        raise Seatbelt::Errors::ObjectDoesNotExistError 
+      else
+        tunneled_object = object.send(proxy_associated_object)
+        callees         = tunneled_object.eigenmethods.map do |eigenmethod|
+          eigenmethod.send(:callee)
+        end
+      
+        callee = callees.uniq.first
+        unless callee.nil?
+          unless object_method
+            warn "You called a single object. Use #call instead." 
+            object_method = proxy_associated_object
+          end
+          return callee.send(object_method)
+        else
+          raise Seatbelt::Errors::MethodNotImplementedError
+        end
+      end
     end
 
     # Public: Delegates a method message to the #object receiver if the
@@ -67,7 +125,7 @@ module Seatbelt
     def method_missing(method_name, *args, &block)
       unless method_name.to_s.in?(NOT_ALLOWABLE_CALLS_ON_OBJECT) &&
         (not self.respond_to?(method_name))
-        object.send(method_name, *args, &block)
+        self.call(method_name, *args, &block)
       else
         super
       end
