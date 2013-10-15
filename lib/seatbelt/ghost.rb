@@ -20,7 +20,9 @@ module Seatbelt
 
     def self.included(base)
       base.class_eval do
-        [Pool::Api, EigenmethodStore, ClassMethods].each { |m| self.extend m }
+        [Pool::Api, EigenmethodStore, ClassMethods, GhostTunnel].each do |mod|
+          self.extend mod
+        end
         include EigenmethodStore
 
         class << self

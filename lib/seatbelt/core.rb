@@ -1,5 +1,6 @@
 require 'seatbelt/core/lookup_table'
 require 'seatbelt/core/pool'
+require 'seatbelt/core/ghost_tunnel'
 require 'seatbelt/core/synthesizeable'
 require 'seatbelt/core/gate'
 require 'seatbelt/core/eigenmethod'

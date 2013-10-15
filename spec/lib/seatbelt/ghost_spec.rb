@@ -24,6 +24,14 @@ describe Seatbelt::Ghost do
       it "#lookup_tbl" do
         expect(Sample).to respond_to(:lookup_tbl)
       end
+
+      it "#enable_tunneling!" do
+        expect(Sample).to respond_to(:enable_tunneling!)
+      end
+
+      it "#disable_tunneling!" do
+        expect(Sample).to respond_to(:disable_tunneling!)
+      end
     end
 
     describe "calling an instance API method" do
@@ -198,6 +206,77 @@ describe Seatbelt::Ghost do
           expect do
             Sample.find_hotel_next_to(:lat => 50.3, :lng => 37.5)
           end.to raise_error(Seatbelt::Errors::NoMethodError)
+        end
+
+      end
+
+    end
+
+    describe "tunneling to an implementation class" do
+
+      context "tunneling enabled" do
+        before(:all) do
+          Sample.class_eval do
+            enable_tunneling!
+
+            api_method :call_groupings
+          end
+          ImplementSample.class_eval do
+            include Seatbelt::Document
+            attribute :groupings, Integer
+
+            def get_groupings
+              return groupings
+            end
+            implement :get_groupings, :as => "Sample#call_groupings"
+
+            def tunnel_with_block(value)
+              return value * yield(1)
+            end
+          end
+        end
+
+        it "provides #tunnel method" do
+          sample = Sample.new
+          expect(sample).to respond_to(:tunnel)
+        end
+
+        it "tunnels a method call to the implementation class instance" do
+          sample = Sample.new
+          sample.tunnel(:groupings=, 12)
+          expect(sample.call_groupings).to eq 12
+
+          result = sample.tunnel(:tunnel_with_block, 10) do |maxnum|
+            3*3 - maxnum
+          end
+          expect(result).to eql 80
+        end
+      end
+
+      context "tunneling disabled" do
+        before(:all) do
+          Sample.class_eval do
+            disable_tunneling!
+          end
+        end
+
+        it "did not provide #tunnel method" do
+          expect(Sample.new).to_not respond_to(:tunnel)
+          expect do
+            Sample.new.tunnel(:groupings=, 12)
+          end.to raise_error(Seatbelt::Errors::NoMethodError)
+        end
+      end
+
+      context "tunneling not enabled" do
+        before(:all) do
+          class TunnelSample
+            include Seatbelt::Ghost
+          end
+        end
+
+        it "did not provide #tunnel method" do
+          expect(TunnelSample.new).to_not respond_to(:tunnel)
         end
 
       end

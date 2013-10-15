@@ -378,6 +378,68 @@ end
 
 Which only synthesizes the ```:l_name``` and ```:gidd_lat``` properties.
 
+### Tunneling from API class instances to implementation class instances
+
+Any API class that implements Seatbelt::Ghost can have access to its
+implementation class instance. This behaviour has to be enabled before using
+because its a violation of the Public/Private API approach.
+
+(**And yes - in Ruby private methods are not really private methods.**)
+
+Accessing the implementation instance is only available after the API Class
+was instantiated.
+
+Example:
+
+```ruby
+class Hotel
+  include Seatbelt::Ghost
+
+  enable_tunneling! # access to the implementation instance is not
+                    # possible.
+
+end
+
+class ImplementationHotel
+  include Seatbelt::Document
+  include Seatbelt::Gate
+
+  attribute :ignore_dirty_rooms, Boolean
+
+end
+
+hotel = new Hotel
+hotel.tunnel(:ignore_dirty_rooms=,false)
+```
+
+Passing blocks is also available if the accessed method supports blocks
+
+```ruby
+class ImplementationHotel
+  include Seatbelt::Document
+  include Seatbelt::Gate
+
+  attribute :ignore_dirty_rooms, Boolean
+
+  def filter_rooms(sections)
+    rooms = self.rooms.map{|room| sections.include?(room_type)}
+    yield(rooms)
+  end
+end
+
+hotel.tunnel(:filter_rooms, ["shower, kitchen"]) do |rooms|
+  rooms.select do |room|
+    # do something
+  end
+end
+```
+
+**Note** that this is a dangerous approach and should be avoided. If you change the
+the implementation layer and you are using tunneling from API classes to Implementation classes you have to make sure that the new implementation layer provides the attribute or
+method you are tunneling to with your API class instance.
+
+To disable tunneling just call the ```disable_tunneling!``` class method.
+
 ### Man ... we need a translator here
 
 > "The Babel fish," said The Hitchhiker's Guide to the Galaxy quietly, "is small, yellow and leech-like, and probably the oddest thing in the Universe. It feeds on brainwave energy received not from its own carrier but from those around it. It absorbs all unconscious mental frequencies from this brainwave energy to nourish itself with. It then excretes into the mind of its carrier a telepathic matrix formed by combining the conscious thought frequencies with nerve signals picked up from the speech centres of the brain which has supplied them. The practical upshot of all this is that if you stick a Babel fish in your ear you can instantly understand anything in any form of language. The speech patterns you actually hear decode the brainwave matrix which has been fed into your mind by your Babel fish.
