@@ -23,12 +23,13 @@ module Seatbelt
 
       api_method_config = lookup_tbl.
                           find_method(method_name, scope: scope)
+      arity = api_method_config[method_name][:arity]
       if api_method_config[method_name][:block_required]
         if block.nil?
           raise Seatbelt::Errors::ApiMethodBlockRequiredError
         end
       end
-      Seatbelt::Terminal.call(method_name, klass, *args, &block)
+      Seatbelt::Terminal.call(method_name, klass, arity, *args, &block)
     end
   end
 end

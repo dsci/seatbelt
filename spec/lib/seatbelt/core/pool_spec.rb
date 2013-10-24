@@ -166,6 +166,101 @@ describe Seatbelt::Pool::Api do
           end
         end
 
+        describe "#arity" do
+
+          context "specifying arguments" do
+
+            describe "without argument list" do
+
+              it "is an unsigned number of arguments passed to #api_method" do
+                pool.api_method :method_with_attrs, :args => [:a, :b, :c]
+                expect(pool.lookup_tbl.last[:method_with_attrs][:arity]).to eq 3
+              end
+
+              describe "and default values" do
+
+                it "is a signed number of arguments passed to #api_method" do
+                  pool.api_method :method_with_defaults, :args => [:a, :b,"k=1"]
+                  method = pool.lookup_tbl.last[:method_with_defaults]
+                  expect(method[:arity]).to eq -3
+                end
+
+              end
+
+              describe "and block" do
+
+                it "ignores the block argument" do
+                  pool.api_method :method_with_block, :args => [:a, :b, "&c"]
+                  method = pool.lookup_tbl.last[:method_with_block]
+                  expect(method[:arity]).to eq 2
+                end
+
+                describe "and default values" do
+
+                  it "is a signed number of arguments passed to #api_method" do
+                    args = [:a,"k=1", "&block"]
+                    pool.api_method :method_block_defaults, :args => args
+                    method = pool.lookup_tbl.last[:method_block_defaults]
+                    expect(method[:arity]).to eq -2
+                  end
+
+              end
+
+              end
+
+            end
+
+            describe "with arguments list" do
+
+              it "is a signed number of arguments passed to #api_method" do
+                pool.api_method :method_wth_args_list,
+                                :args => ["a", "b", "c", "*f"]
+                method = pool.lookup_tbl.last[:method_wth_args_list][:arity]
+                expect(method).to eq -4
+              end
+
+              describe "and default values" do
+
+                it "is a signed number of arguments passed to #api_method" do
+                  pool.api_method :method_args_a_defs,
+                                  :args => ["a", "b", "c=12","*f"]
+                  method = pool.lookup_tbl.last[:method_args_a_defs]
+                  expect(method[:arity]).to eq -3
+                end
+
+              end
+
+              describe "and block" do
+                it "ignores the block argument" do
+                  pool.api_method :method_args_l_block, :args => [:a, "*f", "&c"]
+                  method = pool.lookup_tbl.last[:method_args_l_block]
+                  expect(method[:arity]).to eq -2
+                end
+
+                describe "and default values" do
+                  it "is a signed number of arguments passed to #api_method" do
+                    pool.api_method :method_args_a_defs_block,
+                                    :args => ["a", "b", "c=12","*f" , "&block"]
+                    method = pool.lookup_tbl.last[:method_args_a_defs_block]
+                    expect(method[:arity]).to eq -3
+                  end
+                end
+
+              end
+
+            end
+
+          end
+
+          context "omitting arguments" do
+            it "is 0" do
+              pool.api_method :my_method
+              expect(pool.lookup_tbl.last[:my_method][:arity]).to equal 0
+            end
+          end
+
+        end
+
       end
 
     end

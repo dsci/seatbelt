@@ -119,5 +119,7 @@ module Seatbelt
       end
     end
 
+    class ArgumentMissmatchError < ArgumentError; end
+
   end
 end

@@ -43,7 +43,7 @@ describe Seatbelt::Ghost do
         end
 
         Sample.class_eval do
-          api_method :sum_numbers
+          api_method :sum_numbers, :args => [:a,:b]
         end
 
         class ImplementSample
@@ -57,7 +57,7 @@ describe Seatbelt::Ghost do
         end
 
         SampleWithNamespace::Sample.class_eval do
-          api_method :seat_count
+          api_method :seat_count, :args => [:flight_number]
         end
 
         ImplementSample.class_eval do
@@ -145,12 +145,14 @@ describe Seatbelt::Ghost do
             include Seatbelt::Ghost
 
             api_method  :find_region_by_code,
-                        :scope => :class
+                        :scope => :class,
+                        :args => [:code]
           end
 
           SampleWithNamespace::Sample.class_eval do
             api_method  :book_in_time,
-                        :scope => :class
+                        :scope => :class,
+                        :args => [:from, :to]
           end
 
           class ImplementsSampleClassMethods

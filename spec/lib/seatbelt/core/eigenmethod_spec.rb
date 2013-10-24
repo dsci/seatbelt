@@ -43,6 +43,10 @@ describe Seatbelt::Eigenmethod do
     expect(subject).to respond_to(:class_level?)
   end
 
+  it "provides #arity" do
+    expect(subject).to respond_to(:arity)
+  end
+
   describe "#call" do
     let(:proxy){ Seatbelt::Eigenmethod.new }
     context "on instance level" do

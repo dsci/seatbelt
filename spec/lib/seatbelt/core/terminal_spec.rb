@@ -133,9 +133,9 @@ describe Seatbelt::Terminal do
                                                 :receiver    => package.receiver,
                                               })
             end
-            expect(Seatbelt::Terminal.call(:my_method, ASample.new ,2)).to eq 6
+            expect(Seatbelt::Terminal.call(:my_method, ASample.new ,1,2)).to eq 6
 
-            expect(Seatbelt::Terminal.call(:chain, ASample.new)).to \
+            expect(Seatbelt::Terminal.call(:chain, ASample.new, 0)).to \
                   respond_to(:abs_of_number)
 
           end
@@ -160,7 +160,8 @@ describe Seatbelt::Terminal do
             }
             #Seatbelt::EigenmethodProxy.set(Seatbelt::Proxy.new, options)
             ASample.class_eval do
-              api_method :c_method, :scope => :class
+              api_method  :c_method, :scope => :class,
+                          :args => [:sum1, :sum2]
             end
             ASample.c_method(2,3)
             #expect(Seatbelt::Terminal.call(:c_method, ASample,2,3)).to eq 5

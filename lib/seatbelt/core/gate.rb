@@ -114,9 +114,11 @@ module Seatbelt
         method_proxy.implemented_as             = remote_method
         method_proxy.receiver                   = receiver
         method_proxy.method_implementation_type = type
+        #method_proxy.arity                      = method.arity
 
         if method_scope.eql?(:instance)
           method    = instance_method(method)
+          method_proxy.arity = method.arity
         else
           method_proxy = eigenmethods_class_level(namespace,method_proxy)
         end
@@ -145,8 +147,9 @@ module Seatbelt
         klass             = Module.const_get(method_proxy.namespace)
 
         method_proxy.init_klass_on_receiver(klass)
+        method_proxy.arity = method_proxy.instance_variable_get(:@callee).
+                                              method(method_proxy.method).arity
         klass.eigenmethods << method_proxy
-
         return method_proxy
       end
 

@@ -30,11 +30,12 @@ module Seatbelt
     #
     # action  -   The API method name to be called
     # klass   -   The API class name on which the API method is declared
+    # arity   -   Number of required arguments
     # *args   -   An argument list passed to the implementation method
     # &block  -   An optional block passed to the implementation method.
     #
     # Returns the return value of the implementation method.
-    def self.call(action, klass, *args, &block)
+    def self.call(action, klass, arity, *args, &block)
       raise Seatbelt::Errors::MethodNotImplementedError if luggage.empty?
       scope               = klass.class.eql?(Class) ? :class : :instance
       klass_namespace     = scope.eql?(:class) ? klass.name : klass.class.name
@@ -45,6 +46,10 @@ module Seatbelt
 
       unless eigenmethod
         raise Seatbelt::Errors::MethodNotImplementedError
+      end
+
+      unless eigenmethod.arity.eql?(arity)
+        raise Seatbelt::Errors::ArgumentMissmatchError
       end
 
       eigenmethod.call(*args, &block)

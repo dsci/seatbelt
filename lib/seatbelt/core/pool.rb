@@ -23,6 +23,10 @@ module Seatbelt
       #                         :block_required  - defines if the method
       #                                            require a Ruby Block for
       #                                            usage.
+      #                         :args             - An array of expected
+      #                                             arguments as Symbols or
+      #                                             Strings. If omitted the
+      #                                             method expects no arguments.
       #
       #
       # If no arguments are passed, a Seatbelt::Errors::ArgumentsMissmatchError
@@ -38,9 +42,31 @@ module Seatbelt
           raise Errors::MetaMethodDuplicateError
         end
         default_options   = { :scope          => :instance,
-                              :block_required => false
+                              :block_required => false,
+                              :arity          => 0
                             }
         options           = args.extract_options!
+        if options.has_key?(:args)
+          arity = options.delete(:args)
+          size  = arity.size
+          block_size = lambda do
+            block_match = arity.join(",").scan(/\&{1,}/)
+            size = size - block_match.size if block_match
+            return size
+          end
+          if arity.join(",").match(/\*{1,}/)
+            size = -block_size.call
+            eqls = arity.join(",").scan(/[\=]+/).size
+            size = size + eqls
+            default_options[:arity] = size
+          else
+            size = block_size.call
+            eqls = arity.join(",").scan(/[\=]+/).size
+            size = eqls > 0 ? -size : size
+            default_options[:arity] = size
+          end
+        end
+
         meta_definitions  = { args.first => default_options.merge(options) }
 
         lookup_tbl.set(meta_definitions)

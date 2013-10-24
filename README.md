@@ -75,10 +75,13 @@ end
 
 ```api_method``` expects at least one argument, it's method name. The second argument is optional but has to be a ```Hash```.
 
+If your API meta-method expects arguments you have to specify the list of arguments.
+
 ```ruby
 api_method  :find_nearby,
             :scope          => :class,
-            :block_required => false
+            :block_required => false,
+            :args => [:options]
 ```
 
 With this, a class method ```find_nearby``` is defined at the ```Hotel``` class. Calling that method is straight forward:
@@ -103,6 +106,20 @@ hotel.number_of_rooms_with_tv_sets
 If your API meta-method specification says that the method requires a block, just pass truthy
 to the ```:block_required``` key.
 
+A note about method argument specification:
+
+```ruby
+api_method :foo,
+           :args => ["name", "*args", "&block"]
+```
+
+expects that you have an implementation body - let's say - like this:
+
+```
+def implement_foo(name, *args, &block)
+  # ...
+end
+```
 
 ### Implement API meta-methods
 

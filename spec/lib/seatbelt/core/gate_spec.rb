@@ -140,9 +140,9 @@ describe Seatbelt::Gate do
 
           attribute :name, String
 
-          api_method :bar
+          api_method :bar, :args => [:name]
           api_method :foo
-          api_method :codecs
+          api_method :codecs, :args => [:num]
 
         end
 
@@ -320,64 +320,64 @@ describe Seatbelt::Gate do
       end
     end
 
-    context "accessing implemenation attributes" do 
+    context "accessing implemenation attributes" do
 
-      context "with using proxy#tunnel" do 
+      context "with using proxy#tunnel" do
 
         before(:all) do
           class ApiB
             include Seatbelt::Document
             include Seatbelt::Ghost
-  
+
             api_method :foobar
             api_method :bar
           end
           class ApiA
             include Seatbelt::Document
             include Seatbelt::Ghost
-  
+
             has :b, ApiB
             api_method :my_delegating
             api_method :init_b
           end
-  
+
           class ImplementationA
             include Seatbelt::Gate
-  
+
             def init_b
               proxy.b = ApiB.new
             end
             implement :init_b,
                       :as => "ApiA#init_b"
-  
+
             def implement_my_delegating
               proxy.tunnel("b.nice_looking")
             end
             implement :implement_my_delegating,
                       :as => "ApiA#my_delegating"
           end
-  
+
           class ImplementationB
             include Seatbelt::Document
             include Seatbelt::Gate
-  
+
             attribute :nice_looking, String, :default => "Black"
-  
+
             def implement_foobar
-  
+
             end
             implement :implement_foobar,
                       :as => "ApiB#foobar"
-  
+
             def implement_bar
-  
+
             end
             implement :implement_bar,
                       :as => "ApiB#bar"
           end
         end
 
-        it "calls another implementation attribute or method" do 
+        it "calls another implementation attribute or method" do
           api = ApiA.new
           api.init_b
           expect(api.my_delegating).to eq "Black"

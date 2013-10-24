@@ -8,7 +8,8 @@ module Seatbelt
                   :namespace,
                   :implemented_as,
                   :method,
-                  :method_implementation_type
+                  :method_implementation_type,
+                  :arity
 
     attr_writer   :receiver
 
