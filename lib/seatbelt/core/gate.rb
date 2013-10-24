@@ -29,6 +29,7 @@ module Seatbelt
 
     module ClassMethods
       include Gate::Proxy
+      include Gate::Implementation
 
       # Internal: Collection of implementation methods configurations defined
       # with the #implement_class directive.
@@ -60,9 +61,12 @@ module Seatbelt
       # *args - An argument list containing:
       #
       # Returns the duplicated String.
+      #
+      # Deprecates that in future versions!
       def implement_class(*args)
-        options = args.extract_options!
-        klass   = args.pop
+        warn "Calling #implement_class will be deprecated in Seatbelt 1.0."
+        options   = args.extract_options!
+        klass     = args.pop
         only      = options[:only]
         iterator  = Core::Iterators::MethodConfig.
                       send("#{only.class.name.downcase}_method_iterator",klass,
@@ -93,6 +97,8 @@ module Seatbelt
       #
       # Forwards the implementation method :check_speakers to the class method
       # #invite_speakers of the class Conference within the module Rails.
+      #
+      # This will be private in Seatbelt 1.0.
       def implement(*args)
         options       = args.extract_options!
         method        = args.pop

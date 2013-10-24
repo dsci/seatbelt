@@ -62,26 +62,31 @@ Seatbelt::Ghost
 
 module.
 
-That gives you access to the ```api_method``` class method. API meta-methods are not implemented, they will only defined. Be sure that you have a specification of these methods like passing how many arguments and if a block is required.
+That gives you access to the ```interface``` class method. API meta-methods are not implemented, they will only defined. Be sure that you have a specification of these methods like passing how many arguments and if a block is required.
+
+```interface``` takes an argument that defines on which object level the method should be
+callable (The implementation class has to define a matcher for this. See below.)
 
 ```ruby
 class Hotel
   include Seatbelt::Gate
 
-  api_method  :find_nearby,
-              :scope => :class
+  interface :class do
+    define  :find_nearby,
+            :args => [:options]
+  end
+
 end
 ```
 
-```api_method``` expects at least one argument, it's method name. The second argument is optional but has to be a ```Hash```.
+```define``` expects at least one argument, it's method name. The second argument is optional but has to be a ```Hash```.
 
 If your API meta-method expects arguments you have to specify the list of arguments.
 
 ```ruby
-api_method  :find_nearby,
-            :scope          => :class,
-            :block_required => false,
-            :args => [:options]
+define  :find_nearby,
+        :block_required => false,
+        :args => [:options]
 ```
 
 With this, a class method ```find_nearby``` is defined at the ```Hotel``` class. Calling that method is straight forward:
@@ -90,10 +95,12 @@ With this, a class method ```find_nearby``` is defined at the ```Hotel``` class.
 Hotel.find_nearby(:city => "London") # returns all Hotels near London
 ```
 
-To define an instance API meta-method at the ```Hotel``` class, just pass ```:instance``` to ```:scope``` or omit the ```:scope``` key:
+To define an instance API meta-method at the ```Hotel``` class, just pass ```:instance``` to ```:interface``` method:
 
 ```ruby
-api_method :number_of_rooms_with_tv_sets
+interface :instance do
+  define :number_of_rooms_with_tv_sets
+end
 ```
 
 And, like above, calling is just pure Ruby:
@@ -109,8 +116,8 @@ to the ```:block_required``` key.
 A note about method argument specification:
 
 ```ruby
-api_method :foo,
-           :args => ["name", "*args", "&block"]
+define  :foo,
+        :args => ["name", "*args", "&block"]
 ```
 
 expects that you have an implementation body - let's say - like this:
@@ -131,65 +138,50 @@ Then it's possible to associate the implemention method with the API meta-method
 class ImplementHotel
   include Seatbelt::Gate
 
+  implementation "Hotel", :class do
+    match 'hotels_nearby_city'  => 'find_nearby'
+    match 'all'                 => 'all'
+  end
+
   def hotels_nearby_city(options={})
    # ...
   end
-  implement :hotels_nearby_city, :as => "Hotel.find_nearby"
 
   def self.all
     # ....
   end
-  implement :all, :as   => "Hotel.all",
-                  :type => :class
+
 end
 ```
 
-The ```implement``` directive takes two arguments. The first one is the method name of the
-implementation, the second one is a ```Hash``` with a ```:as``` key and optional a ```:type``` key.
+The ```implementation``` directive takes two arguments. The first one is the method name of the API class, the second one is the object level the implementation is defined on (```:instance```, ```:class```).
 
-The ```:as``` key takes a String that defines in which class the API meta-method is located and the name of the method to implement. The scope of the method (class or instance method) is identified with the seperator that isolates the Class namespace.
-
-The ```:type``` key let you define a delegation of a class method in your implementation class to a class method in your API class.
-
-For identifying instance methods within the API class use ```#``` , for defining class methods use ```.``` .
+The ```match``` directive takes an Hash containing the implementation method name as key and the API method as value.
 
 ```ruby
 class ImplementHotel
   include Seatbelt::Gate
 
+  # Class methods.
+  implementation "Hotel", :class do
+    match 'hotels_nearby_city'  => 'find_nearby'
+  end
+
+  # Instance methods.
+  implementation "Hotel", :instance do
+    match 'rooms_with_tv' => 'number_of_rooms_with_tv_sets'
+  end
+
   def hotels_nearby_city(options={})
    # ...
   end
-  implement :hotels_nearby_city, :as => "Hotel.find_nearby" # class method
 
   def rooms_with_tv
     #....
   end
-  implement :rooms_with_tv,
-            :as => "Hotel#number_of_rooms_with_tv_sets" #instance method
-end
-```
-
-Another way to implement API methods is to use a bulk definition of the implementation class.This is quite helpful if most of your methods in your implementation class are implementations of API methods of one(!) API class.
-
-```ruby
-class ImplementRegion
-  include Seatbelt::Gate
-
-  implement_class "Vagalo::Region",
-                  :only => [
-                            {:implement_find_by_iso_code => {:as => ".by_isocode"}}
-                           ]
-
-  def implement_find_by_iso_code(code)
-    # do smth
-  end
 
 end
 ```
-
-Note that  the method config signature is mostly the same like #implement but the class name or namespace is obviously removed at the ```:at``` key.
-
 
 ### Accessing the API class in implementations of API meta-methods
 
@@ -237,7 +229,9 @@ class Airport
   attribute :lat,   Float
   attribute :lng,   Float
 
-  api_method :identifier
+  interface :instance do
+    define :identifier
+  end
 
 end
 ```

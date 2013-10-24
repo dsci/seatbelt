@@ -35,6 +35,8 @@ module Seatbelt
       # name was given.
       # If a meta-method name is passed that already exists in the lookup table,
       # a Seatbelt::Errors::MetaMethodDuplicateError is raised.
+      #
+      # This will be a private method with Seatbelt 1.0.
       def api_method(*args)
         raise Errors::ArgumentsMissmatchError if args.empty?
         raise Errors::MissingMetaMethodName if args.first.is_a?(Hash)

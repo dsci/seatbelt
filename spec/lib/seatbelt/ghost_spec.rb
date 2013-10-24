@@ -32,6 +32,14 @@ describe Seatbelt::Ghost do
       it "#disable_tunneling!" do
         expect(Sample).to respond_to(:disable_tunneling!)
       end
+
+      it "#interface" do
+        expect(Sample).to respond_to(:interface)
+      end
+
+      it "#define" do
+        expect(Sample).to respond_to(:define)
+      end
     end
 
     describe "calling an instance API method" do
@@ -129,6 +137,59 @@ describe Seatbelt::Ghost do
           expect do
             sample.factorize(6)
           end.to raise_error(Seatbelt::Errors::NoMethodError)
+        end
+
+      end
+
+      describe "defined with :interface directive" do
+        before(:all) do
+          class SampleWithInterface
+            include Seatbelt::Ghost
+            interface :instance do
+              define :calc, :args => [:a, :b]
+              define :factorize, :args => [:num]
+            end
+
+            interface :class do
+              define :class_calc, :args => [:a,:b]
+            end
+          end
+
+
+          class ImplementationSampleWithInterface
+            include Seatbelt::Gate
+
+            def implement_calc(a,b)
+              a+b
+            end
+            implement :implement_calc,
+                      :as => "SampleWithInterface#calc"
+            implement :implement_calc,
+                      :as => "SampleWithInterface.class_calc"
+          end
+        end
+
+        context "instance method" do
+          it "evaluates the method" do
+            expect(SampleWithInterface.new.calc(5,32)).to eq 37
+          end
+        end
+
+        context "class method" do
+          it "evaluates the method" do
+            expect(SampleWithInterface.class_calc(3,4)).to eq 7
+          end
+        end
+
+        describe "but not implemented" do
+
+          it "raises Seatbelt::Errors::NoMethodError" do
+            sample = SampleWithInterface.new
+            expect do
+              sample.factorize(6)
+            end.to raise_error(Seatbelt::Errors::MethodNotImplementedError)
+          end
+
         end
 
       end

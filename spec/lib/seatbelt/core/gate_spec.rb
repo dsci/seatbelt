@@ -140,9 +140,11 @@ describe Seatbelt::Gate do
 
           attribute :name, String
 
-          api_method :bar, :args => [:name]
-          api_method :foo
-          api_method :codecs, :args => [:num]
+          interface :instance do
+            define :bar, :args => [:name]
+            define :foo
+            define :codecs, :args => [:num]
+          end
 
         end
 
@@ -150,24 +152,26 @@ describe Seatbelt::Gate do
           include Seatbelt::Gate
           attr_accessor :airport_codes
 
+          implementation "ProxySample", :instance do
+            match 'implement_bar' => 'bar'
+            match 'implement_foo' => 'foo'
+            match 'implement_increase_airport_codes' => "codecs"
+          end
+
           def implement_bar(name)
             @airport_codes = 12
             proxy.name = name
             return [proxy,self]
           end
-          implement :implement_bar, :as => "ProxySample#bar"
 
           def implement_foo
             return [proxy,self]
           end
-          implement :implement_foo, :as => "ProxySample#foo"
 
           def implement_increase_airport_codes(num)
             @airport_codes = num
             return self
           end
-          implement :implement_increase_airport_codes,
-                    :as => "ProxySample#codecs"
 
         end
 
@@ -203,15 +207,24 @@ describe Seatbelt::Gate do
 
           attribute :code, Integer
 
-          api_method :sample_method1
-          api_method :sample_method2
-          api_method :sample_method3
+          interface :instance do
+            define :sample_method1
+            define :sample_method2
+            define :sample_method3
+          end
+
         end
 
         class ImplementationApiFooSample
           include Seatbelt::Gate
 
           attr_accessor :codec
+
+          implementation "ApiFooSample", :instance do
+            match 'implementation_sample_method1' => 'sample_method1'
+            match 'implementation_sample_method2' => 'sample_method2'
+            match 'implementation_sample_method3' => 'sample_method3'
+          end
 
           def initialize
             @codec = "mp4"
@@ -225,24 +238,17 @@ describe Seatbelt::Gate do
             #p proxy.object_id
             return proxy,self, codec
           end
-          implement :implementation_sample_method1,
-                    :as => "ApiFooSample#sample_method1"
 
           def implementation_sample_method2
             #p self.object_id
             @codec = "divx"
-
-
             return proxy,self, codec
           end
-          implement :implementation_sample_method2,
-                    :as => "ApiFooSample#sample_method2"
 
           def implementation_sample_method3
             return proxy,self, codec
           end
-          implement :implementation_sample_method3,
-                    :as => "ApiFooSample#sample_method3"
+
         end
       end
 
@@ -284,16 +290,20 @@ describe Seatbelt::Gate do
           class ApiBarSample
             include Seatbelt::Ghost
 
-            api_method :method1
+            interface :instance do
+              define :method1
+            end
+
           end
 
           ImplementationApiFooSample.class_eval do
+            implementation "ApiBarSample", :instance do
+              match 'implement_with_other_namespace' => 'method1'
+            end
+
             def implement_with_other_namespace
               return proxy, self
             end
-            implement :implement_with_other_namespace,
-                      :as => "ApiBarSample#method1"
-
           end
 
         end
