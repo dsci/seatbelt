@@ -35,7 +35,8 @@ module Seatbelt
         @_scope       = Seatbelt::GateConfig.method_directives[scope]
         yield(self)
         iterator      = Core::Iterators::MethodConfig.
-                                send("array_method_iterator",namespace,self)
+                                send("array_method_iterator",namespace,
+                                     self,scope)
         bulk_methods.each(&iterator)
       end
 

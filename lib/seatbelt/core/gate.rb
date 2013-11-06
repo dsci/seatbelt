@@ -30,11 +30,27 @@ module Seatbelt
     module ClassMethods
       include Gate::Proxy
       include Gate::Implementation
-
       # Internal: Collection of implementation methods configurations defined
       # with the #implement_class directive.
       def implementation_methods
         @impl_methods ||= []
+      end
+
+      def implementation_class_methods
+        @implementation_class_methods ||= []
+      end
+
+      def singleton_method_added(name)
+        implementation_method = implementation_class_methods.detect do |method_config|
+          name.in?(method_config.keys)
+        end
+        if implementation_method
+          config = implementation_method.values.pop
+          method = name.to_sym#bind(self)
+          config[:method] = method
+          config[:type] = :class
+          implement(name, config)
+        end
       end
 
       # Public: Ruby hook to check if a method that is added to the class was
@@ -52,26 +68,6 @@ module Seatbelt
           config[:method] = method
           implement(name, config)
         end
-      end
-
-      # Public: Adds a bunch of method forward declaration object to for a
-      # specific class.
-      # Later it calls #implement during #method_added.
-      #
-      # *args - An argument list containing:
-      #
-      # Returns the duplicated String.
-      #
-      # Deprecates that in future versions!
-      def implement_class(*args)
-        warn "Calling #implement_class will be deprecated in Seatbelt 1.0."
-        options   = args.extract_options!
-        klass     = args.pop
-        only      = options[:only]
-        iterator  = Core::Iterators::MethodConfig.
-                      send("#{only.class.name.downcase}_method_iterator",klass,
-                           self)
-        only.each(&iterator)
       end
 
       # Public: Adds a method forward declaration object to a method config
@@ -152,9 +148,14 @@ module Seatbelt
         method_proxy      = Seatbelt::EigenmethodProxy.set(proxy, options)
         klass             = Module.const_get(method_proxy.namespace)
 
+        callee = method_proxy.instance_variable_get(:@callee)
         method_proxy.init_klass_on_receiver(klass)
-        method_proxy.arity = method_proxy.instance_variable_get(:@callee).
-                                              method(method_proxy.method).arity
+        implementation_type = method_proxy.instance_variable_get(:@method_implementation_type)
+        if implementation_type.eql?(:instance)
+          method_proxy.arity = callee.instance_method(method_proxy.method).arity
+        else
+          method_proxy.arity = callee.method(method_proxy.method).arity
+        end
         klass.eigenmethods << method_proxy
         return method_proxy
       end

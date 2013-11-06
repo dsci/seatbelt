@@ -14,10 +14,10 @@ module Seatbelt
         # gate_klass  - The class that includes the Gate module
         #
         # Returns a Proc that is useable for [].each
-        def self.array_method_iterator(klass, gate_klass)
+        def self.array_method_iterator(klass, gate_klass, scope)
           return lambda do |method_config|
             method_config.send(:each_pair,
-                               &hash_method_iterator(klass,gate_klass))
+                               &hash_method_iterator(klass,gate_klass, scope))
           end
         end
 
@@ -28,14 +28,16 @@ module Seatbelt
         # gate_klass  - The class that includes the Gate module
         #
         # Returns a Proc that is useable for {}.each_pair
-        def self.hash_method_iterator(klass, gate_klass)
+        def self.hash_method_iterator(klass, gate_klass, scope)
+          methods_bucket = :implementation_methods if scope.eql?(:instance)
+          methods_bucket = :implementation_class_methods if scope.eql?(:class)
           return lambda do |(key,value)|
             method_name = key
             implementation_config = {}
             implementation_config[method_name] = {
               :as => "#{klass}#{value[:as]}",
             }
-            gate_klass.send(:implementation_methods) << implementation_config
+            gate_klass.send(methods_bucket) << implementation_config
           end
         end
 
