@@ -30,6 +30,11 @@ module Seatbelt
       # TravelIt Node: ANZBEWERTUNG
       attribute :rating_count,      Integer
 
+
+      interface :class do
+        define  :quick_find,
+                args: [:number_of_adults]
+      end
     end
   end
 end

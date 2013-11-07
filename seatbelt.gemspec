@@ -21,6 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
   spec.add_runtime_dependency "activesupport"
-  spec.add_runtime_dependency "virtus"
+  spec.add_runtime_dependency "virtus", "0.5.5"
   spec.add_runtime_dependency "activemodel"
 end
