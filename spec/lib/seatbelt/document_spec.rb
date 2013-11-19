@@ -157,7 +157,7 @@ describe Seatbelt::Document do
         let(:document){ SampleDocument.new }
 
         it "returns an instance of array" do
-          expect(document.hotels).to be_instance_of Seatbelt::Collections::Array
+          expect(document.hotels).to respond_to(:count)
         end
 
         context "adding a model that isn't of required type" do

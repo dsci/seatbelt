@@ -59,7 +59,7 @@ module Seatbelt
 
     def self.included(base)
       base.class_eval do
-        include ::Virtus
+        include ::Virtus.model
         include ::ActiveModel::Validations
         extend Document::Associations
       end
@@ -136,7 +136,7 @@ module Seatbelt
         collection_module_name  = "Seatbelt::Collections::#{model_name}Collection"
         collection              = Module.const_get(collection_module_name)
         collection.initialize_primitive(collection_model)
-        self.send(:attribute, collection_name, collection)
+        self.send(:attribute, collection_name, collection[collection_model])
       end
 
       # Public: Defines a single reference to another Seatbelt::Document class.
