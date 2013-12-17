@@ -102,7 +102,7 @@ describe Seatbelt::Terminal do
               implement :method_to_call, :as => "ASample#my_method"
 
               def acts_as_class_method(factor1, factor2)
-                p proxy
+                #p proxy
                 factor1 * factor2 - proxy.call(:klass_method)
               end
               implement :acts_as_class_method, :as => "ASample.c_method"
