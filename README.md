@@ -128,6 +128,19 @@ def implement_foo(name, *args, &block)
 end
 ```
 
+**Defining API properties**
+
+If the API class should provide properties use the ```define_property``` for single property or ```define_properties``` for multiple property definiton.
+
+```ruby
+interface :instance do
+  define_property :foo
+  define_properties :bar, :foobar
+end
+```
+
+
+
 ### Implement API meta-methods
 
 Defining API meta-methods is simple, but how to implement the logic of these methods? Use a plain Ruby class and include the ```Seatbelt::Gate``` module.
@@ -208,6 +221,28 @@ end
 Note that this is only possible for ```:instance``` level implementations.
 
 (Thanks to @LarsM for suggesting this feature.)
+
+**Implementing API properties**
+
+Similiar to ```match``` associate the properties of your implementation class and your API class with ```match_property```.
+
+```ruby
+ # Having an identical property wthin the interface.
+ implementation "Book", :instance do
+   match_property 'author'
+ end
+
+ # Property names differ
+ implementation "Book", :instance do
+   match_property 'implementation_title' => 'title'
+ end
+
+ # Property is defined in the superclass
+ implementation "Novel", :instance do
+   match_property :publisher, :superclass => true
+ end
+```
+
 
 ### Accessing the API class in implementations of API meta-methods
 

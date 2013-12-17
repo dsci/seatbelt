@@ -40,6 +40,14 @@ describe Seatbelt::Ghost do
       it "#define" do
         expect(Sample).to respond_to(:define)
       end
+
+      it "#define_property" do
+        expect(Sample).to respond_to(:define_property)
+      end
+
+      it "#define_properties" do
+        expect(Sample).to respond_to(:define_properties)
+      end
     end
 
     describe "calling an instance API method" do
@@ -148,6 +156,9 @@ describe Seatbelt::Ghost do
             interface :instance do
               define :calc, :args => [:a, :b]
               define :factorize, :args => [:num]
+
+              define_property :foo
+              define_properties :bar,:foobar
             end
 
             interface :class do
@@ -158,6 +169,7 @@ describe Seatbelt::Ghost do
 
           class ImplementationSampleWithInterface
             include Seatbelt::Gate
+            include Seatbelt::Document
 
             def implement_calc(a,b)
               a+b
@@ -166,6 +178,28 @@ describe Seatbelt::Ghost do
                       :as => "SampleWithInterface#calc"
             implement :implement_calc,
                       :as => "SampleWithInterface.class_calc"
+
+            attribute :implement_foo, Integer
+
+            implement :implement_foo,
+                      :as => "SampleWithInterface#foo"
+            implement :"implement_foo=",
+                      :as => "SampleWithInterface#foo="
+
+            attribute :implement_bar, Integer
+
+            implement :implement_bar,
+                      :as => "SampleWithInterface#bar"
+            implement :"implement_bar=",
+                      :as => "SampleWithInterface#bar="
+
+            attribute :implement_foobar, Integer
+
+            implement :implement_foobar,
+                      :as => "SampleWithInterface#foobar"
+            implement :"implement_foobar=",
+                      :as => "SampleWithInterface#foobar="
+
           end
         end
 
@@ -179,6 +213,39 @@ describe Seatbelt::Ghost do
           it "evaluates the method" do
             expect(SampleWithInterface.class_calc(3,4)).to eq 7
           end
+        end
+
+        context "property" do
+
+          context "on instance level" do
+
+            it "evaluates the setter and getter methods" do
+              sample_with_interface_instance        = SampleWithInterface.new
+              sample_with_interface_instance.foo    = 12
+              sample_with_interface_instance.bar    = 10
+              sample_with_interface_instance.foobar = 11
+              expect(sample_with_interface_instance.foo).to eq 12
+              expect(sample_with_interface_instance.bar).to eq 10
+              expect(sample_with_interface_instance.foobar).to eq 11
+            end
+
+          end
+
+          context "on class level" do
+
+            it "raises an PropertyOnClassLevelDefinedError" do
+              expect do
+                SampleWithInterface.class_eval do
+
+                  interface :class do
+                    define_property :class_foo
+                  end
+                end
+
+              end.to raise_error(Seatbelt::Errors::PropertyOnClassLevelDefinedError)
+            end
+          end
+
         end
 
         describe "but not implemented" do

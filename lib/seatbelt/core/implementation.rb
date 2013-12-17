@@ -77,6 +77,69 @@ module Seatbelt
         }
       end
 
+      # Public: Builds an Hash representation for property that is passed to
+      # #match(hsh)
+      #
+      # A property is an ivar that is accessible through a getter and setter.
+      #
+      # #match_property is only useable within the :instance scope,
+      #
+      # Examples:
+      #
+      #   # Having an identical property wthin the interface.
+      #   implementation "Book", :instance do
+      #     match_property 'author'
+      #   end
+      #
+      #   # Property names differ
+      #   implementation "Book", :instance do
+      #     match_property 'implementation_title' => 'title'
+      #   end
+      #
+      #   # Property is defined in the superclass
+      #   implementation "Novel", :instance do
+      #     match_property :publisher, :superclass => true
+      #   end
+      #
+      # args - An argumentlist containing one of the following
+      #         - property name as String or Symbol
+      #         - config Hash similiar to #match
+      #         - an Hash containing :superclass key (optional)
+      #
+      def match_property(*args)
+        options   = {}
+        if args.size.eql?(1)
+          property  = args.pop
+        else
+          options   = args.pop
+          property  = args.shift
+          options.stringify_keys!
+        end
+        if property.is_a?(String) || property.is_a?(Symbol)
+          [property, "#{property}="].each do |method|
+            match_options               = {}
+            match_options[method]       = method
+            match_options["superclass"] = options.fetch("superclass", false)
+            match(match_options)
+          end
+        elsif property.is_a?(Hash)
+          property.stringify_keys!
+          implement_property  = property.keys.first.to_sym
+          remote_property     = property.values.first
+          [{implement_property => remote_property},
+           {"#{implement_property}=" => "#{remote_property}="}].each do |opt|
+            if property.has_key?("superclass")
+              opt["superclass"] = property.fetch("superclass")
+            end
+            match(opt)
+          end
+        else
+          raise Seatbelt::Errors::TypeMissmatchError.
+                                  new("String, Symbol or Hash",
+                                      property.class.name)
+        end
+      end
+
     end
   end
 end

@@ -410,5 +410,90 @@ describe Seatbelt::Gate do
       end
 
     end
+
+    context "property matching" do
+
+      context "using #match_property" do
+
+        context "with string as argument" do
+
+          class PropertyFoo
+            include Seatbelt::Ghost
+            interface :instance do
+              define_property :foo
+              define_property :foobar
+            end
+          end
+
+          class ImplementationPropertyFooParent
+
+            attr_accessor :foobar
+
+          end
+
+          class ImplementationPropertyFoo < ImplementationPropertyFooParent
+            include Seatbelt::Gate
+            include Seatbelt::Document
+            implementation "PropertyFoo", :instance do
+              match_property :foobar, :superclass => true
+              match_property :foo
+            end
+
+            attr_accessor :foo
+
+          end
+
+          it "matches identical named getter and setters" do
+            property_foo = PropertyFoo.new
+            property_foo.foo = 100
+            property_foo.foobar = 10
+            expect(property_foo.foo).to eq 100
+            expect(property_foo.foobar).to eq 10
+          end
+
+        end
+
+        context "with hash as argument" do
+
+          class PropertyBar
+            include Seatbelt::Ghost
+            interface :instance do
+              define_property :bar
+              define_property :real_world
+            end
+          end
+
+          class ImplementationPropertyParent
+
+            attr_accessor :super_foo
+
+          end
+
+          class ImplementationPropertyBar < ImplementationPropertyParent
+            include Seatbelt::Gate
+            include Seatbelt::Document
+            implementation "PropertyBar", :instance do
+              match_property 'implement_bar_accessor' => 'bar'
+              match_property 'super_foo' => 'real_world', :superclass => true
+            end
+
+            attr_accessor :implement_bar_accessor
+
+          end
+
+          it "matches the explicitly named getter and setter" do
+            property_foo = PropertyBar.new
+            property_foo.bar = 100
+            property_foo.real_world = "England"
+            expect(property_foo.bar).to eq 100
+            expect(property_foo.real_world).to eq "England"
+          end
+
+        end
+
+      end
+
+    end
+
   end
 end

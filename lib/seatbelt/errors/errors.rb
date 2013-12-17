@@ -121,5 +121,16 @@ module Seatbelt
 
     class ArgumentMissmatchError < ArgumentError; end
 
+    # Public: Will be raised if a property is tried to define on a class level
+    # interface.
+    class PropertyOnClassLevelDefinedError < ::StandardError
+      def message
+        <<-MESSAGE.gsub(/^\s+/, "")
+          You try to define a property at class level interface. That is not
+            supported by now but maybe in future version.
+        MESSAGE
+      end
+    end
+
   end
 end
