@@ -1,3 +1,4 @@
+![Seatbelt](http://datenspiel.s3.amazonaws.com/vagalo/seatbelt_top.jpg)
 # Seatbelt
 
 Interface for communication between the Vagalo web application and a travel data
