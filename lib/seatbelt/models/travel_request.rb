@@ -46,11 +46,52 @@ module Seatbelt
         # Append '_desc' to sort descending (f.e. :price_desc)
         define_property :sort_by
 
-
         # Finds offers by selfs attributes
         #
         # Returns Seatbelt::Models::TravelResponse or nil
         define :find_offers
+      end
+
+
+      # Define which properties are accessible by the
+      # :properties and :properties= methods
+      ACCESSIBLE_PROPERTIES = [
+        :number_of_adults, :type_of_travel, :departure_date, :return_date,
+        :min_days_of_travel, :max_days_of_travel, :group_by, :skip, :limit,
+        :sort_by
+      ]
+
+
+      # Public: Collect properties and there values.
+      #         Property must be accessible to be member of result
+      #
+      # Returns Hash
+      def properties
+        hsh = {}
+        ACCESSIBLE_PROPERTIES.each { |key| hsh[key] = self.send(key) }
+        hsh
+      end
+
+
+      # Public: Sets multiple properties at once.
+      #
+      # Params:
+      #   hsh - Hash. Key-value pairs of properties.
+      #         Properties not in hsh won't be changed.
+      #         Pass nil to clear all properties.
+      #
+      # Returns updated property-Hash
+      def properties=(hsh)
+        if hsh.nil?
+          ACCESSIBLE_PROPERTIES.each do |key|
+            self.send("#{key}=", nil)
+          end
+        else
+          hsh.each do |key, val|
+            self.send("#{key}=", val) if ACCESSIBLE_PROPERTIES.member?(key.to_sym)
+          end
+        end
+        properties
       end
 
     end
