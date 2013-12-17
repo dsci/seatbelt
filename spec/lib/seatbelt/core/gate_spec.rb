@@ -276,6 +276,43 @@ describe Seatbelt::Gate do
           expect(apibar_object).not_to be api_object
         end
       end
+
+      context "methods of superclass of the implementation class" do
+
+        before(:all) do
+          class ApiInheritanceSample
+            include Seatbelt::Ghost
+
+            interface :instance do
+              define :hello_world, :args => [:name]
+            end
+          end
+
+          class ImplementationSuperClass
+
+            def implementation_world(name)
+              "Hello #{name}!"
+            end
+
+          end
+
+          class ImplementationChildClass < ImplementationSuperClass
+            include Seatbelt::Gate
+
+            implementation "ApiInheritanceSample", :instance do
+              match 'implementation_world' => 'hello_world', :superclass=>true
+            end
+
+          end
+        end
+
+        it "evaluates the method defined in the superclass" do
+          inheritance_sample = ApiInheritanceSample.new
+          expected = "Hello Max!"
+          expect(inheritance_sample.hello_world("Max")).to eq expected
+        end
+
+      end
     end
 
     context "api methods on class level" do

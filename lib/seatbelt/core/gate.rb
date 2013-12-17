@@ -10,7 +10,9 @@ module Seatbelt
         extend Synthesizeable
         extend ClassMethods
         private_class_method :implementation_methods,
-                             :eigenmethods_class_level
+                             :eigenmethods_class_level,
+                             :initialize_implementation_method,
+                             :implementation_from_superclass
       end
     end
 
@@ -59,6 +61,10 @@ module Seatbelt
       #
       # name - the method name as Symbol
       def method_added(name)
+        initialize_implementation_method(name)
+      end
+
+      def initialize_implementation_method(name)
         implementation_method = implementation_methods.detect do |method_config|
           name.in?(method_config.keys)
         end
@@ -68,6 +74,12 @@ module Seatbelt
           config[:method] = method
           implement(name, config)
         end
+      end
+
+      def implementation_from_superclass(superclass_method, config)
+        method = self.superclass.instance_method(superclass_method).bind(self.new)
+        config[:method] = method
+        implement(superclass_method,config)
       end
 
       # Public: Adds a method forward declaration object to a method config

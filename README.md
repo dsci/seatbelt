@@ -183,6 +183,32 @@ class ImplementHotel
 end
 ```
 
+With the ```match``` directive it is also possible to bind an implementation method from the superclass to the given interface class:
+
+```ruby
+
+class MetaBook
+  # An implementation method used for all childs of MetaBook
+  def general_stuff_for_books
+    #...
+  end
+end
+
+class ImplementationNovel < MetaBook
+  include Seatbelt::Gate
+
+  implementation "Novel", :instance do
+    match 'general_stuff_for_books' => 'publisher', :superclass => true
+  end
+
+end
+
+```
+
+Note that this is only possible for ```:instance``` level implementations.
+
+(Thanks to @LarsM for suggesting this feature.)
+
 ### Accessing the API class in implementations of API meta-methods
 
 You can access the API class within the implementation methods through the
