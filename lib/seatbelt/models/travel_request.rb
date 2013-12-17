@@ -8,44 +8,35 @@ module Seatbelt
 
       interface :instance do
         # Number of adults - Integer
-        define :number_of_adults
-        define :number_of_adults=, args: [:val]
+        define_property :number_of_adults
 
         # Type of travel - Symbol (:package, :hotel_only, :flight_only)
-        define :type_of_travel
-        define :type_of_travel=, args: [:val]
+        define_property :type_of_travel
 
         # Departure date - Date
-        define :departure_date
-        define :departure_date=, args: [:val]
+        define_property :departure_date
 
         # Return date - Date
-        define :return_date
-        define :return_date=, args: [:val]
+        define_property :return_date
 
         # Minimum number of travel days - Integer
-        define :min_days_of_travel
-        define :min_days_of_travel=, args: [:val]
+        define_property :min_days_of_travel
 
         # Maximum number of travel days - Integer
-        define :max_days_of_travel
-        define :max_days_of_travel=, args: [:val]
+        define_property :max_days_of_travel
 
 
         # Others #
         #--------#
 
         # Offers grouping - Symbol (:none, :hotel, :hotel_per_operator)
-        define :group_by
-        define :group_by=, args: [:val]
+        define_property :group_by
 
         # Offers to skip in case there are more offers available - Integer
-        define :skip
-        define :skip=, args: [:val]
+        define_property :skip
 
         # Number of offers to return - Integer
-        define :limit
-        define :limit=, args: [:val]
+        define_property :limit
 
         # Offers sorting - Symbol
         # ( :price, :operator, :hotel_name, :hotel_city, :hotel_category,
@@ -53,8 +44,7 @@ module Seatbelt
         #
         # Append '_asc'  to sort ascending  (f.e. :price_asc)
         # Append '_desc' to sort descending (f.e. :price_desc)
-        define :sort_by
-        define :sort_by=, args: [:val]
+        define_property :sort_by
 
 
         # Finds offers by selfs attributes
