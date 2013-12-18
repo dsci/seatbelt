@@ -643,7 +643,7 @@ TravelAgent.tell_me "Hotel: 3 persons want to travel for 10 days beginning at ne
 Delegates the query ```3 persons want to travel for 10 days beginning at next friday to Finnland.``` to the ```Seatbelt::Hotel``` model.
 
 The model declaration can be ommitted, if this is done, the query is delegated to the
-```Seatbelt::Region``` model.
+```Seatbelt::Offer``` model.
 
 Define your tapes in ```lib/seatbelt/tapes```!
 

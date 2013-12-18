@@ -164,9 +164,9 @@ describe Seatbelt::Document do
 
           it "raises a Seatbelt::Errors::TypeMissmatchError" do
             message = "An instance of Seatbelt::Models::Hotel awaited but "
-            message += "get an instance of Seatbelt::Models::Region."
+            message += "get an instance of Seatbelt::Models::Offer."
             expect do
-              document.hotels << Seatbelt::Models::Region.new
+              document.hotels << Seatbelt::Models::Offer.new
             end.to raise_error Seatbelt::Errors::TypeMissmatchError, message
           end
         end
@@ -212,14 +212,14 @@ describe Seatbelt::Document do
           it "raises an TypeMissmatchError if model isn't required type" do
             document = SampleDocument.new
             message = "An instance of Seatbelt::Models::Hotel awaited but "
-            message += "get an instance of Seatbelt::Models::Region."
+            message += "get an instance of Seatbelt::Models::Offer."
             expect do
-              document.hotels << Seatbelt::Models::Region.new
+              document.hotels << Seatbelt::Models::Offer.new
             end.to raise_error Seatbelt::Errors::TypeMissmatchError, message
             message = "An instance of Seatbelt::Models::Offer awaited but "
-            message += "get an instance of Seatbelt::Models::Region."
+            message += "get an instance of Seatbelt::Models::Hotel."
             expect do
-              document.offers << Seatbelt::Models::Region.new
+              document.offers << Seatbelt::Models::Hotel.new
             end.to raise_error Seatbelt::Errors::TypeMissmatchError, message
           end
 

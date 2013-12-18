@@ -39,18 +39,18 @@ describe "Seatbelt::TravelAgent" do
       context "if responsible model name is omitted" do
 
         before(:all) do
-          Seatbelt::Models::Region.class_eval { include Seatbelt::TapeDeck }
-          class RegionSampleTape < Seatbelt::Tape
-            translate /Find subregions of (\w+)/ do |sentence, region|
+          Seatbelt::Models::Offer.class_eval { include Seatbelt::TapeDeck }
+          class OfferSampleTape < Seatbelt::Tape
+            translate /Find hotels in (\w+)/ do |sentence, city|
               tape_deck
             end
           end
-          Seatbelt::Models::Region.add_tape RegionSampleTape
+          Seatbelt::Models::Offer.add_tape OfferSampleTape
         end
 
-        it "then calls the Region model" do
-          expect(Seatbelt::TravelAgent.tell_me "Find subregions of Spain").to eq\
-                                                        Seatbelt::Models::Region
+        it "then calls the Offer model" do
+          expect(Seatbelt::TravelAgent.tell_me "Find hotels in Barcelona").to eq\
+                                                        Seatbelt::Models::Offer
         end
 
       end

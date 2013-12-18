@@ -1,4 +1,3 @@
-require 'seatbelt/models/region'
 require 'seatbelt/models/hotel'
 require 'seatbelt/models/flight'
 require 'seatbelt/models/airport'
