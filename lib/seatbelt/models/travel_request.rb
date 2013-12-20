@@ -49,15 +49,16 @@ module Seatbelt
         # Region names - Array<String> | Array<Regexp>
         define_property :region_names
 
-        # Language of the request - Symbol
-        define_property :language
-
-
         # Finds offers by selfs attributes
         #
         # Returns Seatbelt::Models::TravelResponse or nil
         define :find_offers
       end
+
+
+      # Language of the request - Symbol, default :de
+      attribute :language, Symbol, default: :de
+
 
 
       # Define which properties are accessible by the

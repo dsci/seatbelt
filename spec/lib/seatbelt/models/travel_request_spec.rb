@@ -6,10 +6,16 @@ describe Seatbelt::Models::TravelRequest do
     Seatbelt::Models::TravelRequest
   end
 
-
-  subject { klass.new }
-
   it_behaves_like "ApiClass"
+
+
+  %w( language ).each do |attr_name|
+  
+    it "responds to :#{attr_name}" do 
+      expect(subject).to respond_to attr_name
+    end
+
+  end
 
 
   describe "#properties" do
