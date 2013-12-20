@@ -17,12 +17,14 @@ module Seatbelt
         match_property 'h' => 'type_of_travel'
         match_property 'i' => 'group_by'
         match_property 'j' => 'sort_by'
+        match_property 'k' => 'region_names'
+        match_property 'l' => 'language'
 
         # Other methods
         match 'find_offers' => 'find_offers'
       end      
 
-      (:a..:j).each do |getter|
+      (:a..:l).each do |getter|
         setter = "#{getter}="
 
         define_method(getter) { props[getter] }

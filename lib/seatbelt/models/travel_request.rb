@@ -46,6 +46,13 @@ module Seatbelt
         # Append '_desc' to sort descending (f.e. :price_desc)
         define_property :sort_by
 
+        # Region names - Array<String> | Array<Regexp>
+        define_property :region_names
+
+        # Language of the request - Symbol
+        define_property :language
+
+
         # Finds offers by selfs attributes
         #
         # Returns Seatbelt::Models::TravelResponse or nil
@@ -58,7 +65,7 @@ module Seatbelt
       ACCESSIBLE_PROPERTIES = [
         :number_of_adults, :type_of_travel, :departure_date, :return_date,
         :min_days_of_travel, :max_days_of_travel, :group_by, :skip, :limit,
-        :sort_by
+        :sort_by, :region_names, :language
       ]
 
 
