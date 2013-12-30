@@ -48,6 +48,26 @@ describe Seatbelt::Ghost do
       it "#define_properties" do
         expect(Sample).to respond_to(:define_properties)
       end
+
+      it "#accessible_properties" do
+        expect(Sample).to respond_to(:accessible_properties)
+      end
+
+      it "#property_accessible" do
+        expect(Sample).to respond_to(:property_accessible)
+      end
+    end
+
+    describe "provides instance methods" do
+
+      it "#properties" do
+        expect(Sample.new).to respond_to(:properties)
+      end
+
+      it "#properties=" do
+        expect(Sample.new).to respond_to("properties=")
+      end
+
     end
 
     describe "calling an instance API method" do
@@ -229,6 +249,137 @@ describe Seatbelt::Ghost do
               expect(sample_with_interface_instance.foobar).to eq 11
             end
 
+          end
+
+          context "accessible properties for mass assignment" do
+
+            context "when property isnt defined" do
+
+              it "raises a PropertyNotYetDefinedError error" do
+                expect do
+                  SampleWithInterface.class_eval do
+                    interface :instance do
+                      property_accessible :doomed
+                    end
+                  end
+                end.to raise_error(Seatbelt::Errors::PropertyNotDefinedYetError)
+              end
+
+            end
+
+            context "when defined as accessible" do
+
+              before do
+                SampleWithInterface.class_eval do
+                  interface :instance do
+
+                    property_accessible :foo
+                  end
+                end
+              end
+
+              it "is assignable with #properties=" do
+                sample = SampleWithInterface.new
+                expect(SampleWithInterface.accessible_properties).to include(:foo)
+                sample.properties = {:foo => 123}
+                expect(sample.foo).to eq 123
+                sample.properties = { "foo" => 245 }
+                expect(sample.foo).to eq 245
+              end
+
+              it "is included in #properties" do 
+                expect(SampleWithInterface.new.properties).to have_key(:foo)
+              end
+
+            end
+
+            context "when not defined as accessible" do
+
+              before(:all) do
+                SampleWithInterface.class_eval do
+                  interface :instance do
+                    define_property :doomed
+                  end
+                end
+
+                ImplementationSampleWithInterface.class_eval do
+                  attribute :implementation_doomed, Integer
+
+                  implement :implementation_doomed,
+                            :as => "SampleWithInterface#doomed"
+
+                  implement :"implementation_doomed=",
+                            :as => "SampleWithInterface#doomed="
+
+                end
+              end
+
+              it "is not assignable with #properties=" do
+                sample = SampleWithInterface.new
+                expect(SampleWithInterface.accessible_properties).to_not \
+                                                                include(:doomed)
+                sample.doomed = 12
+                sample.properties = { :doomed => 11 }
+                expect(sample.doomed).to_not eq 11
+                expect(sample.doomed).to eq 12
+              end
+
+              it "is not included in #properties" do 
+                sample = SampleWithInterface.new
+
+                expect(sample.properties).to_not have_key(:doomed)
+              end
+            end
+
+            context "an attribute is marked as accessible property" do 
+
+              context "attribute is defined" do 
+                class AttributeAccessible 
+                  include Seatbelt::Ghost
+                  include Seatbelt::Document
+                  
+                  attribute :attribute_a, :Integer
+
+                  interface :instance do 
+                    define_property :kanban
+
+                    property_accessible :attribute_a, :kanban
+                  end
+                
+                end
+
+                class ImplementationAttributeAccessible
+                  include Seatbelt::Gate
+                  include Seatbelt::Document
+                  implementation "AttributeAccessible", :instance do
+                    match_property 'implement_kanban' => 'kanban'
+                  end
+      
+                  attr_accessor :implement_kanban
+
+                end
+               
+              end
+
+              it "is assignable with #properties=" do 
+                sample = AttributeAccessible.new
+                expect(AttributeAccessible.accessible_properties).to \
+                                                          include(:attribute_a)
+                expect(AttributeAccessible.accessible_properties).to \
+                                                          include(:kanban)
+                sample.properties = { :attribute_a => 900, :kanban => 12 }
+                expect(sample.attribute_a).to eq 900
+                expect(sample.kanban).to eq 12
+              end
+
+              it "is included in #properties" do 
+                sample = AttributeAccessible.new
+
+                expect(sample.properties).to have_key(:attribute_a)
+                expect(sample.properties(:all)).to have_key(:attribute_a)
+              end
+
+            end
           end
 
           context "on class level" do

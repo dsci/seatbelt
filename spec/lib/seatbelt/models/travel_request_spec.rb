@@ -25,14 +25,14 @@ describe Seatbelt::Models::TravelRequest do
     end
 
     it "requests accessible properties" do
-      klass::ACCESSIBLE_PROPERTIES.each do |prop|
-        expect(subject).to receive(prop)
+      subject.properties.each do |prop_key, prop_value|
+        expect(subject).to receive(prop_key)
       end
       subject.properties
     end
 
-    it "returns as many key-value-apirs as properties accessible" do
-      cnt = klass::ACCESSIBLE_PROPERTIES.count
+    it "returns as many key-value-pairs as properties accessible" do
+      cnt = subject.properties.count
       expect(subject.properties.keys.count).to eq cnt
     end
 
@@ -40,22 +40,14 @@ describe Seatbelt::Models::TravelRequest do
 
   describe "#properties=" do
 
-    let(:random_prop) { klass::ACCESSIBLE_PROPERTIES.sample }
+    let(:random_prop) { subject.properties.keys.sample }
 
     it "sets the value of an acessible property" do
       prop = random_prop
       subject.properties = { prop => "something" }
       expect(subject.send(prop)).to eq "something"
     end
-
     
-    it "param nil sets all properties to nil" do
-      prop = random_prop      
-      subject.properties = { prop => "something else" }
-      subject.properties = nil
-      expect(subject.send(prop)).to be_nil
-    end
-
   end
 
 end

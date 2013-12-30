@@ -140,7 +140,23 @@ interface :instance do
 end
 ```
 
+If you want to update a bunch of properties at once, you must mark them as accessible.
 
+```ruby
+interface :instance do
+  define_property :foo
+  define_properties :bar, :foobar
+
+  property_accessible :foo, :bar
+end
+
+
+foo = Foo.new
+
+foo.properties = { :foo => 12, :bar => "glasses", :foobar => "of beer." }
+```
+
+In the example above, the ```foobar``` property will not be set, because it's not marked as accessible. 
 
 ### Implement API meta-methods
 

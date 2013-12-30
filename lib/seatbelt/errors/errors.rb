@@ -132,5 +132,19 @@ module Seatbelt
       end
     end
 
+    class PropertyNotDefinedYetError < ::StandardError
+
+      def initialize(property_name)
+        @property_name = property_name
+      end
+
+      def to_s
+        <<-MESSAGE.gsub(/^\s+/, "")
+          You try to define a property as accessible that is not defined yet.
+          Use define_property :#{@property_name} to define your property first.
+        MESSAGE
+      end
+    end
+
   end
 end

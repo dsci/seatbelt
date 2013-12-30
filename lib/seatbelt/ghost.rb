@@ -25,6 +25,7 @@ module Seatbelt
           self.extend mod
         end
         include EigenmethodStore
+        include Seatbelt::Property::InstanceMethods
 
         class << self
 
