@@ -8,8 +8,9 @@ Gem::Specification.new do |spec|
   spec.version       = Seatbelt::VERSION
   spec.authors       = ["Daniel Schmidt"]
   spec.email         = ["dsci@code79.net"]
-  spec.description   = %q{Interface for accessing travel data from TravelIt}
-  spec.summary       = %q{A nifty travel gem}
+  spec.description   = %q{Tool to define implementation interfaces that should be decoupled from their
+implementations. (A Ruby header file approach.)}
+  spec.summary       = %q{Define headers in your Ruby (we try to)}
   spec.homepage      = ""
   spec.license       = "MIT"
 
