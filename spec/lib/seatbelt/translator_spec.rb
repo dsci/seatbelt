@@ -1,16 +1,54 @@
 require 'spec_helper'
 
-describe "Seatbelt::TravelAgent" do
+describe "Seatbelt::Translator" do
 
   describe "class methods" do
 
     it "provides #tell_me" do
-      expect(Seatbelt::TravelAgent).to respond_to(:tell_me)
+      expect(Seatbelt::Translator).to respond_to(:tell_me)
+    end
+
+    it "provides #setup" do
+      expect(Seatbelt::Translator).to respond_to(:setup)
+    end
+
+    describe "#setup" do
+
+      it "configures the model namespace" do
+        Seatbelt::Translator.setup do |config|
+          config.namespace = "Seatbelt::Models::"
+        end
+
+        expect(Seatbelt::Translator.config.namespace).to eq "Seatbelt::Models::"
+
+      end
+
+      it "configures the model name regular expression" do
+        Seatbelt::Translator.setup do |config|
+          config.name_regex = /\w{1,}/
+        end
+
+        expect(Seatbelt::Translator.config.name_regex).to eq /\w{1,}/
+      end
+
+      it "configures the default model class for delegating questions" do
+        Seatbelt::Translator.setup do |config|
+          config.default_model_class = "Offer"
+        end
+
+        expect(Seatbelt::Translator.config.default_model_class).to eq "Offer"
+      end
+
     end
 
     describe "#tell_me" do
 
       before(:all) do
+        Seatbelt::Translator.config.name_regex = nil
+        Seatbelt::Translator.setup do |c|
+          c.namespace           = "Seatbelt::Models::"
+          c.default_model_class = "Offer"
+        end
         class HotelSampleTape < Seatbelt::Tape
           translate /Show me (\d+) of the (\w+) in (\w+)/ do |sentence,
                                                               count,
@@ -32,7 +70,7 @@ describe "Seatbelt::TravelAgent" do
 
       it "query starts with responsible model" do
         query   = "Hotel: Show me 2 of the cheapest in London"
-        result  = Seatbelt::TravelAgent.tell_me query
+        result  = Seatbelt::Translator.tell_me query
         expect(result).to eq "Seatbelt::Models::Hotel"
       end
 
@@ -49,7 +87,7 @@ describe "Seatbelt::TravelAgent" do
         end
 
         it "then calls the Offer model" do
-          expect(Seatbelt::TravelAgent.tell_me "Find hotels in Barcelona").to eq\
+          expect(Seatbelt::Translator.tell_me "Find hotels in Barcelona").to eq\
                                                         Seatbelt::Models::Offer
         end
 
@@ -57,7 +95,7 @@ describe "Seatbelt::TravelAgent" do
 
       it "gets the tape that responds to the query and plays the tape" do
         query = "Hotel: 3 persons want to travel for 10 days beginning at next friday to Finnland."
-        result = Seatbelt::TravelAgent.tell_me query
+        result = Seatbelt::Translator.tell_me query
 
         expect(result).to be_instance_of Array
       end

@@ -1,7 +1,0 @@
-require 'seatbelt/collections/collection'
-require 'seatbelt/collections/hotel_collection'
-require 'seatbelt/collections/airport_collection'
-require 'seatbelt/collections/country_collection'
-require 'seatbelt/collections/flight_collection'
-require 'seatbelt/collections/region_collection'
-require 'seatbelt/collections/offer_collection'

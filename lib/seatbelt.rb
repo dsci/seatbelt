@@ -32,4 +32,6 @@ module Seatbelt
   def self.configure_gate
     yield GateConfig if block_given?
   end
+
 end
+

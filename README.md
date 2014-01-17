@@ -1,8 +1,8 @@
 ![Seatbelt](http://datenspiel.s3.amazonaws.com/vagalo/seatbelt_top.jpg)
 # Seatbelt
 
-Interface for communication between the Vagalo web application and a travel data
-layer.
+Tool to define implementation interfaces that should be decoupled from their
+implementations. (A Ruby header file approach.)
 
 ## Development instructions
 
@@ -156,7 +156,7 @@ foo = Foo.new
 foo.properties = { :foo => 12, :bar => "glasses", :foobar => "of beer." }
 ```
 
-In the example above, the ```foobar``` property will not be set, because it's not marked as accessible. 
+In the example above, the ```foobar``` property will not be set, because it's not marked as accessible.
 
 ### Implement API meta-methods
 
@@ -317,6 +317,15 @@ end
 To access the attributes within an implementation class use the ```proxy``` and it's ```call``` method.
 
 For more informations about attributes see the [Virtus](https://github.com/solnic/virtus) project.
+
+**A node about attributes and Mongoid**: If you include ```mongoid``` in your project and any ```attribute``` should be a boolean, you have use the full path to the type:
+
+```ruby
+attribute :is_read, Virtus::Attribute::Boolean
+```
+
+For further informations see: https://github.com/solnic/virtus/issues/132#issuecomment-11611142
+
 
 ### Defining associations between objects
 
@@ -535,7 +544,7 @@ To disable tunneling just call the ```disable_tunneling!``` class method.
 
 *(The Hitchhiker's Guide to the Galaxy)*
 
-Let's talk about basics of the TQL (Travel Query Language). TQL is basically a query formed in a natural sentence (language doesn't matter) after a defined syntax.
+Let's talk about basics of the TQL (Translation Query Language). TQL is basically a query formed in a natural sentence (language doesn't matter) after a defined syntax.
 
 TQL basic support is implemented in Seatbelt v0.4. Basic support means that you are able to implement your own translations and tapes.
 
@@ -646,20 +655,30 @@ Note the difference between the two ```play_tape``` calls.
 
 With the ```tape_deck``` object within your translate block you have access to the associated tape deck class (not instance).
 
-### TravelAgent
+### Translator
 
 By knowing what tapes and tape decks are, it's easy to understand what the TravelAgent is doing.
 
-The TravelAgent takes the query and delegates the query to the responsible model.
+The Translator takes the query and delegates the query to the responsible model.
 
 ```ruby
-TravelAgent.tell_me "Hotel: 3 persons want to travel for 10 days beginning at next friday to Finnland."
+Translator.tell_me "Hotel: 3 persons want to travel for 10 days beginning at next friday to Finnland."
 ```
 
-Delegates the query ```3 persons want to travel for 10 days beginning at next friday to Finnland.``` to the ```Seatbelt::Hotel``` model.
+Delegates the query ```3 persons want to travel for 10 days beginning at next friday to Finnland.``` to the ```Hotel``` model.
 
 The model declaration can be ommitted, if this is done, the query is delegated to the
-```Seatbelt::Offer``` model.
+model that is defined in the ```Translator.setup```:
+
+```ruby
+Seatbelt::Translator.setup do |c|
+  c.namespace           = "Seatbelt::Models::"
+  c.default_model_class = "Offer"
+end
+```
+
+That will call ```Seatbelt::Models::Offer``` if no model declaration is given within a query.
+
 
 Define your tapes in ```lib/seatbelt/tapes```!
 
