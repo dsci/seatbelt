@@ -286,11 +286,11 @@ end
 ```ruby
 def rooms_with_tv
   excluded_rooms  = proxy.second_floor
-  room_criteria   = proxycriteria(:not => :gallery)
+  room_criteria   = proxy.criteria(:not => :gallery)
 end
 ```
 
-**Hint**: Chaining API classes could be done by returning ```proxy.object``` from the implementation method.
+**Hint**: Chaining API classes is possible by returning ```proxy.object``` from the implementation method.
 
 **Note:** If you want to delegate a class method of your implementation class to a class API method by using the ```:type``` key, the proxy object acts as the class object of the API class.
 
