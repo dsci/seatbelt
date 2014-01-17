@@ -268,8 +268,8 @@ You can access the API class within the implementation methods through the
 
 Depending the type of method you are implementing, ```proxy``` will be a different scope:
 
-* implementing a later class method, ```proxy``` is the class of the API class defined in ```:as```
-* implementing a later instance method, ```proxy``` is the instance of the API class defined in ```:as```
+* implementing a later class method, ```proxy``` is the class of the API class defined in ```implementation```
+* implementing a later instance method, ```proxy``` is the instance of the API class defined in ```implementation```
 
 The ```proxy``` object provides a ```call``` method to access the ```proxy``` methods. It expects the method name to call, an argument list and an optional block.
 
@@ -318,7 +318,7 @@ To access the attributes within an implementation class use the ```proxy``` and 
 
 For more informations about attributes see the [Virtus](https://github.com/solnic/virtus) project.
 
-**A node about attributes and Mongoid**: If you include ```mongoid``` in your project and any ```attribute``` should be a boolean, you have use the full path to the type:
+**A note about attributes and Mongoid**: If you include ```mongoid``` in your project and any ```attribute``` should be a boolean, you have use the full path to the type:
 
 ```ruby
 attribute :is_read, Virtus::Attribute::Boolean
