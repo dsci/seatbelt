@@ -6,6 +6,8 @@ module Seatbelt
       include Seatbelt::Document
 
 
+      # Type of travel - Symbol (:package, :hotel_only, :flight_only)
+      attribute :type_of_travel,            Symbol
       # departure date with lowest price
       attribute :departure_date,            Date
       # days of travel
@@ -80,6 +82,9 @@ module Seatbelt
       attribute :hotel_rating,              Float  # f.e. 5.1
       # hotel recommendation rate
       attribute :hotel_recommendation_rate, Float  # f.e. 96.0
+
+      # Attribute for implementation specifc attributes
+      attribute :internals,                 Hash
 
 
       # Public: Virtual attribute lowest price

@@ -4,7 +4,8 @@ describe ::Seatbelt::Models::Offer do
   
   subject { Seatbelt::Models::Offer.new }
 
-  %w( departure_date
+  %w( type_of_travel
+      departure_date
       days
       operator
       hotel_gid
@@ -37,7 +38,8 @@ describe ::Seatbelt::Models::Offer do
       hotel_hcid
       hotel_reviews
       hotel_rating
-      hotel_recommendation_rate ).each do |attr_name|
+      hotel_recommendation_rate
+      internals ).each do |attr_name|
   
     it "responds to :#{attr_name}" do 
       expect(subject).to respond_to attr_name
