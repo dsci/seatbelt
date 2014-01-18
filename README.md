@@ -54,7 +54,7 @@ Or install it yourself as:
 
 ### Defining API classes and API meta-methods
 
-Defining classes that acts like API classes is a very simple step. Define a plain
+Defining classes that act like API classes is a very simple step. Define a plain
 Ruby class and include the
 
 ```ruby
@@ -63,10 +63,10 @@ Seatbelt::Ghost
 
 module.
 
-That gives you access to the ```interface``` class method. API meta-methods are not implemented, they will only defined. Be sure that you have a specification of these methods like passing how many arguments and if a block is required.
+That gives you access to the ```interface``` class method. API meta-methods are not implemented, they will only be defined. Be sure that you have a specification of these methods like passing how many arguments and if a block is required.
 
-```interface``` takes an argument that defines on which object level the method should be
-callable (The implementation class has to define a matcher for this. See below.)
+```interface``` takes an argument that defines which object level the method should be
+callable at (The implementation class has to define a matcher for this. See below.)
 
 ```ruby
 class Hotel
@@ -158,9 +158,9 @@ foo.properties = { :foo => 12, :bar => "glasses", :foobar => "of beer." }
 
 In the example above, the ```foobar``` property will not be set, because it's not marked as accessible.
 
-### Implement API meta-methods
+### Implementing API meta-methods
 
-Defining API meta-methods is simple, but how to implement the logic of these methods? Use a plain Ruby class and include the ```Seatbelt::Gate``` module.
+Defining API meta-methods is simple, but how do you implement the logic of these methods? Use a plain Ruby class and include the ```Seatbelt::Gate``` module.
 
 Then it's possible to associate the implemention method with the API meta-method definition.
 
@@ -392,14 +392,14 @@ A ```has``` association takes two arguments where the last one is optional.
 * the association name
 * the class used for the assocation
 
-If the second argument is omitted ```has``` guessed the corrosping model class. Taken the example above it will use the
+If the second argument is omitted ```has``` guessed the corrosping model class. In the example above it will use the
 ```Seatbelt::Models::Region``` class.
 
 You can assign an object to the association the same way as assigning an attribute.
 
 ### Synthesize objects
 
-Synthesizing objects is only available on instance level. By now Seatbelt will only synthesize the state of an object, not its behaviour!
+Synthesizing objects is only available at the instance level. By now Seatbelt will only synthesize the state of an object, not its behaviour!
 
 To synthesize an implementation class instance and the proxy object, add ```synthesize``` to the Implementation class.
 
@@ -532,8 +532,7 @@ hotel.tunnel(:filter_rooms, ["shower, kitchen"]) do |rooms|
 end
 ```
 
-**Note** that this is a dangerous approach and should be avoided. If you change the
-the implementation layer and you are using tunneling from API classes to Implementation classes you have to make sure that the new implementation layer provides the attribute or
+**Note** that this is a dangerous approach and should be avoided. If you change the implementation layer and you are using tunneling from API classes to Implementation classes you have to make sure that the new implementation layer provides the attribute or
 method you are tunneling to with your API class instance.
 
 To disable tunneling just call the ```disable_tunneling!``` class method.
@@ -552,9 +551,9 @@ TQL basic support is implemented in Seatbelt v0.4. Basic support means that you 
 
 A tape is collection of ```translate``` blocks that will translate a query into some business logic. A tape is added to a tape deck that will play the corrosponding tape section to a given query (or better said - call the translation of this query).
 
-Let's take a closer look what a tape deck is and what tapes are.
+Let's take a closer look at what a tape deck is and what tapes are.
 
-Any class could be act as a tape deck by including the ```Seatbelt::TapeDeck``` module. Mostly that classes are also including the ```Seatbelt::Document``` module.
+Any class could act as a tape deck by including the ```Seatbelt::TapeDeck``` module. Mostly that classes are also including the ```Seatbelt::Document``` module.
 
 Adding the ```Seatbelt::TapeDeck``` module to a class gives the class the opportunity to
 
@@ -577,7 +576,7 @@ class PubTape < Seatbelt::Tape
 end
 ```
 
-A ```translate```block takes arguments. If your argument list of ```translate``` block has only one item, this item is the first matched value from your sentence (or if the query didn't expect any matched value then it's the original query sentence).
+A ```translate```block takes arguments. If your argument list to the ```translate``` block has only one item, this item is the first matched value from your sentence (or if the query didn't expect any matched value then it's the original query sentence).
 
 Anyhow - every match marked with your regular expression is passed do the ```translate``` block if there are enough arguments defined.
 
@@ -589,9 +588,9 @@ end
 ```
 
 **Note:** Any argument passed to the block is passed as String. So you have to take care
-about type casts.
+of type casts.
 
-To have access to the tape's translation block, a tape has to assigned to a tape deck.
+To have access to the tape's translation block, a tape has to be assigned to a tape deck.
 
 ```ruby
 class Pub
