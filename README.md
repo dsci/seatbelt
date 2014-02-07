@@ -493,7 +493,7 @@ Example:
 class Hotel
   include Seatbelt::Ghost
 
-  enable_tunneling! # access to the implementation instance is not
+  enable_tunneling! # access to the implementation instance is now
                     # possible.
 
 end
@@ -656,7 +656,7 @@ With the ```tape_deck``` object within your translate block you have access to t
 
 ### Translator
 
-By knowing what tapes and tape decks are, it's easy to understand what the TravelAgent is doing.
+By knowing what tapes and tape decks are, it's easy to understand what the Translator is doing.
 
 The Translator takes the query and delegates the query to the responsible model.
 
