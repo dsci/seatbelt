@@ -5,9 +5,14 @@ describe Seatbelt::Gate do
     include Seatbelt::Gate
   end
 
-  def stub_eigenmethods
-    A.stub(:eigenmethods).and_return([])
-    Vagalo::Airport.stub(:eigenmethods).and_return([])
+  def stub_eigenmethods(*args)
+    opts = args.last.is_a?(Hash) ? args.pop : {}
+    return_value = opts.fetch(:return_value, [])
+    args.each do |klass|
+      klass.class.send(:define_method, :eigenmethods) do
+        return return_value
+      end
+    end
   end
 
   describe "class methods" do
@@ -29,7 +34,7 @@ describe Seatbelt::Gate do
       before(:all) do
         class A; end
         module Vagalo; class Airport; end; end
-        stub_eigenmethods
+        stub_eigenmethods(A, Vagalo::Airport)
       end
 
       it "registers a logic method the the terminal" do

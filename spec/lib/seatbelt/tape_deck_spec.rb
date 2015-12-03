@@ -79,7 +79,7 @@ describe Seatbelt::TapeDeck  do
         it "then it didn't add the tape again" do
           expect do
             Sample.use_tape SampleTape
-          end.to_not change{ Sample.tapes.size }.by(1)
+          end.to change{ Sample.tapes.size }.by(0)
         end
       end
 

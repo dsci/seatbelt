@@ -225,7 +225,7 @@ describe Seatbelt::LookupTable do
           it "nothing happens" do
             expect do
               table.remove_method(:any_other_method)
-            end.to_not change{ table.size }.by(-1)
+            end.to change{ table.size }.by(0)
           end
         end
       end
