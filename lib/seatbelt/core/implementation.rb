@@ -64,6 +64,7 @@ module Seatbelt
       def match(hsh)
         hsh.stringify_keys!
         superclass_definition = hsh.fetch("superclass", false)
+        delegate              = hsh.fetch("delegated", false)
         hsh.delete("superclass")
         implementation_method = hsh.keys.first.to_sym
         remote_method         = hsh.values.first
@@ -72,9 +73,13 @@ module Seatbelt
           self.send(:implementation_from_superclass,
                     implementation_method, config)
         end
-        bulk_methods << {
+        imp_hsh = {
           implementation_method => {:as => "#{@_scope}#{remote_method}"}
         }
+        bulk_methods << imp_hsh
+        if delegate && @_scope.eql?("#")
+          notify_delgated_method(implementation_method, imp_hsh, remote_method)
+        end
       end
 
       # Public: Builds an Hash representation for property that is passed to
@@ -140,6 +145,14 @@ module Seatbelt
         end
       end
 
+      private
+
+      def notify_delgated_method(implementation_method, imp_hsh, remote_method)
+        namespaced_scope = "#{@_namespace}#{@_scope}#{remote_method}"
+        bulk_methods.last[implementation_method][:as] = namespaced_scope
+        bulk_methods.last[implementation_method][:delegated] = true
+        mark_as_instance_implementation.call(imp_hsh, implementation_method)
+      end
     end
   end
 end

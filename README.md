@@ -239,6 +239,21 @@ Note that this is only possible for ```:instance``` level implementations.
 
 (Thanks to @LarsM for suggesting this feature.)
 
+**Using delegated methods**
+
+If you want to use a method as implementation method that is delegated to another object you can mark these methods as
+delegated and Seatbelt will recognize them too.
+
+```ruby
+class BookImplementation
+  delegate :distributor_name, to: :@distributor
+
+  implementation "Book", :instance do
+    match 'distributor_name' => 'distributor', delegated: true
+  end
+end
+```
+
 **Implementing API properties**
 
 Similiar to ```match``` associate the properties of your implementation class and your API class with ```match_property```.

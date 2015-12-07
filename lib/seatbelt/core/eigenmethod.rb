@@ -9,7 +9,8 @@ module Seatbelt
                   :implemented_as,
                   :method,
                   :method_implementation_type,
-                  :arity
+                  :arity,
+                  :delegated
 
     attr_writer   :receiver
 

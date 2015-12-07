@@ -87,6 +87,12 @@ describe Seatbelt::Gate do
 
       before(:all) do
 
+        class Sky
+          def sky_color
+            'blue'
+          end
+        end
+
         class ProxySample
           include Seatbelt::Document
           include Seatbelt::Ghost
@@ -97,6 +103,7 @@ describe Seatbelt::Gate do
             define :bar, :args => [:name]
             define :foo
             define :codecs, :args => [:num]
+            define :sky, :args => [:ff]
           end
 
         end
@@ -105,10 +112,18 @@ describe Seatbelt::Gate do
           include Seatbelt::Gate
           attr_accessor :airport_codes
 
+          delegate :sky_color, to: :@sky
+
           implementation "ProxySample", :instance do
             match 'implement_bar' => 'bar'
             match 'implement_foo' => 'foo'
             match 'implement_increase_airport_codes' => "codecs"
+            match 'sky_color' => 'sky', delegated: true
+            match 'shhh' => 'foo'
+          end
+
+          def initialize
+            @sky = Sky.new
           end
 
           def implement_bar(name)
@@ -143,6 +158,8 @@ describe Seatbelt::Gate do
         expect(first_proxy).not_to be second_proxy
         expect(first_proxy.name).to eq "walter"
         expect(second_proxy.name).to eq "hannes"
+
+        expect(first_proxy.sky).to eq Sky.new.sky_color
       end
 
     end

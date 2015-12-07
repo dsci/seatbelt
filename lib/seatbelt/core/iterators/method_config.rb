@@ -37,6 +37,9 @@ module Seatbelt
             implementation_config[method_name] = {
               :as => "#{klass}#{value[:as]}",
             }
+            if value[:delegated]
+              implementation_config[method_name][:delegated] = value[:delegated]
+            end
             gate_klass.send(methods_bucket) << implementation_config
           end
         end

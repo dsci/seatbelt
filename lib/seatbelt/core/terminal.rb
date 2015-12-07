@@ -48,7 +48,7 @@ module Seatbelt
         raise Seatbelt::Errors::MethodNotImplementedError
       end
 
-      unless eigenmethod.arity.eql?(arity)
+      if (not eigenmethod.delegated) && (not eigenmethod.arity.eql?(arity))
         raise Seatbelt::Errors::ArgumentMissmatchError
       end
 

@@ -7,6 +7,7 @@ module Seatbelt
     def self.included(base)
       base.class_eval do
         include Proxy
+        extend ImplementationCallee
         extend Synthesizeable
         extend ClassMethods
         private_class_method :implementation_methods,
@@ -29,6 +30,27 @@ module Seatbelt
 
     end
 
+    module ImplementationCallee
+      def mark_as_instance_implementation
+        lambda do |implementation_method, name|
+          config = implementation_method.values.pop
+          method = self.instance_method(name).bind(self.new)
+          config[:method] = method
+          implement(name, config)
+        end
+      end
+
+      def mark_as_class_implementation
+        lambda do |implementation_method, name|
+          config = implementation_method.values.pop
+          method = name.to_sym#bind(self)
+          config[:method] = method
+          config[:type] = :class
+          implement(name, config)
+        end
+      end
+    end
+
     module ClassMethods
       include Gate::Proxy
       include Gate::Implementation
@@ -47,11 +69,7 @@ module Seatbelt
           name.in?(method_config.keys)
         end
         if implementation_method
-          config = implementation_method.values.pop
-          method = name.to_sym#bind(self)
-          config[:method] = method
-          config[:type] = :class
-          implement(name, config)
+          mark_as_class_implementation.call(implementation_method, name)
         end
       end
 
@@ -69,10 +87,7 @@ module Seatbelt
           name.in?(method_config.keys)
         end
         if implementation_method
-          config = implementation_method.values.pop
-          method = self.instance_method(name).bind(self.new)
-          config[:method] = method
-          implement(name, config)
+          mark_as_instance_implementation.call(implementation_method, name)
         end
       end
 
@@ -108,14 +123,17 @@ module Seatbelt
       #
       # This will be private in Seatbelt 1.0.
       def implement(*args)
-        options       = args.extract_options!
-        method        = args.pop
-        remote_method = options[:as]
+        options           = args.extract_options!
+        method            = args.pop
+        remote_method     = options[:as]
+        delegated_method  = options.fetch(:delegated,false)
+        
         method_scope  = :class     if remote_method.include?(".")
         method_scope  = :instance  if remote_method.include?("#")
         directive     = Seatbelt::GateConfig.method_directives[method_scope]
         scope_chain   = remote_method.split(directive)
         remote_method = scope_chain.pop.to_sym
+
         namespace     = scope_chain.shift
         type          = options.fetch(:type, :instance)
 
@@ -128,7 +146,10 @@ module Seatbelt
         method_proxy.implemented_as             = remote_method
         method_proxy.receiver                   = receiver
         method_proxy.method_implementation_type = type
+        method_proxy.delegated                  = delegated_method
         #method_proxy.arity                      = method.arity
+
+
 
         if method_scope.eql?(:instance)
           method    = instance_method(method)
